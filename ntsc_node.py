@@ -36,8 +36,7 @@ class NtscRsNode(io.ComfyNode):
             inputs=[
                 io.Image.Input("image", tooltip="Image to apply NTSC effect to"),
 
-                io.Header.Input("signal_processing", "Signal Processing", tooltip="Signal processing settings"),
-
+                # Signal Processing
                 io.Combo.Input(
                     "filter_type",
                     options=FILTER_TYPE_OPTIONS,
@@ -75,8 +74,7 @@ class NtscRsNode(io.ComfyNode):
                 io.Boolean.Input("chroma_vert_blend", default=True,
                     tooltip="Vertically blend chroma between scanlines"),
 
-                io.Header.Input("field_processing", "Field/Line Processing", tooltip="Field and scanline settings"),
-
+                # Field/Line Processing
                 io.Combo.Input(
                     "use_field",
                     options=USE_FIELD_OPTIONS,
@@ -92,8 +90,7 @@ class NtscRsNode(io.ComfyNode):
                 io.Int.Input("video_scanline_phase_shift_offset", default=0, min=0, max=3, step=1,
                     tooltip="Phase shift offset"),
 
-                io.Header.Input("head_switching", "Head Switching", tooltip="VHS head switching artifact emulation"),
-
+                # Head Switching
                 io.Boolean.Input("head_switching_enabled", default=True,
                     tooltip="Enable head switching effect"),
                 io.Int.Input("head_switching_height", default=8, min=0, max=24, step=1,
@@ -109,8 +106,7 @@ class NtscRsNode(io.ComfyNode):
                 io.Float.Input("head_switching_mid_line_jitter", default=0.03, min=0.0, max=1.0, step=0.001,
                     tooltip="Mid-line jitter amount"),
 
-                io.Header.Input("tracking_noise", "Tracking Noise", tooltip="VHS tracking noise emulation"),
-
+                # Tracking Noise
                 io.Boolean.Input("tracking_noise_enabled", default=True,
                     tooltip="Enable tracking noise"),
                 io.Int.Input("tracking_noise_height", default=12, min=0, max=120, step=1,
@@ -124,8 +120,7 @@ class NtscRsNode(io.ComfyNode):
                 io.Float.Input("tracking_noise_noise_intensity", default=0.25, min=0.0, max=1.0, step=0.01,
                     tooltip="Non-speckle noise intensity"),
 
-                io.Header.Input("composite_noise", "Composite Noise", tooltip="Composite signal noise"),
-
+                # Composite Noise
                 io.Boolean.Input("composite_noise_enabled", default=True,
                     tooltip="Enable composite noise"),
                 io.Float.Input("composite_noise_intensity", default=0.05, min=0.0, max=1.0, step=0.001,
@@ -135,8 +130,7 @@ class NtscRsNode(io.ComfyNode):
                 io.Int.Input("composite_noise_detail", default=1, min=1, max=5, step=1,
                     tooltip="Composite noise detail (octaves)"),
 
-                io.Header.Input("luma_noise", "Luma Noise", tooltip="Luminance noise"),
-
+                # Luma Noise
                 io.Boolean.Input("luma_noise_enabled", default=True,
                     tooltip="Enable luminance noise"),
                 io.Float.Input("luma_noise_intensity", default=0.01, min=0.0, max=1.0, step=0.001,
@@ -146,8 +140,7 @@ class NtscRsNode(io.ComfyNode):
                 io.Int.Input("luma_noise_detail", default=1, min=1, max=5, step=1,
                     tooltip="Luminance noise detail (octaves)"),
 
-                io.Header.Input("chroma_noise", "Chroma Noise", tooltip="Chrominance noise"),
-
+                # Chroma Noise
                 io.Boolean.Input("chroma_noise_enabled", default=True,
                     tooltip="Enable chrominance noise"),
                 io.Float.Input("chroma_noise_intensity", default=0.1, min=0.0, max=1.0, step=0.001,
@@ -157,8 +150,7 @@ class NtscRsNode(io.ComfyNode):
                 io.Int.Input("chroma_noise_detail", default=2, min=1, max=5, step=1,
                     tooltip="Chrominance noise detail (octaves)"),
 
-                io.Header.Input("ringing", "Ringing Artifacts", tooltip="Ringing artifact emulation"),
-
+                # Ringing Artifacts
                 io.Boolean.Input("ringing_enabled", default=True,
                     tooltip="Enable ringing artifacts"),
                 io.Float.Input("ringing_frequency", default=0.45, min=0.0, max=1.0, step=0.01,
@@ -168,8 +160,7 @@ class NtscRsNode(io.ComfyNode):
                 io.Float.Input("ringing_intensity", default=4.0, min=0.0, max=10.0, step=0.1,
                     tooltip="Ringing intensity"),
 
-                io.Header.Input("vhs_settings", "VHS Settings", tooltip="VHS tape emulation"),
-
+                # VHS Settings
                 io.Boolean.Input("vhs_enabled", default=True,
                     tooltip="Enable VHS settings"),
                 io.Combo.Input(
@@ -197,8 +188,7 @@ class NtscRsNode(io.ComfyNode):
                 io.Int.Input("vhs_edge_wave_detail", default=2, min=1, max=5, step=1,
                     tooltip="Edge wave detail (octaves)"),
 
-                io.Header.Input("global_effects", "Global Effects", tooltip="Global noise and distortion effects"),
-
+                # Global Effects
                 io.Float.Input("snow_intensity", default=0.00025, min=0.0, max=100.0, step=0.00001,
                     tooltip="Snow speckle frequency (logarithmic)"),
                 io.Float.Input("snow_anisotropy", default=0.5, min=0.0, max=1.0, step=0.01,
@@ -212,8 +202,7 @@ class NtscRsNode(io.ComfyNode):
                 io.Int.Input("chroma_delay_vertical", default=0, min=-20, max=20, step=1,
                     tooltip="Vertical chroma delay (scanlines)"),
 
-                io.Header.Input("scale_settings", "Scale Settings", tooltip="Effect scaling"),
-
+                # Scale Settings
                 io.Boolean.Input("scale_enabled", default=True,
                     tooltip="Enable scale settings"),
                 io.Float.Input("horizontal_scale", default=1.0, min=0.125, max=8.0, step=0.125,
@@ -223,11 +212,9 @@ class NtscRsNode(io.ComfyNode):
                 io.Boolean.Input("scale_with_video_size", default=False,
                     tooltip="Multiply scale by video height"),
 
-                io.Header.Input("misc", "Miscellaneous", tooltip="Other settings"),
-
+                # Miscellaneous
                 io.Int.Input("random_seed", default=0, min=-2147483648, max=2147483647, step=1,
                     tooltip="Random seed for noise generation"),
-
                 io.Int.Input("frame_num", default=0, min=0, max=2147483647, step=1,
                     tooltip="Frame number (for temporal effects)"),
             ],

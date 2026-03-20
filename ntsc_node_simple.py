@@ -13,7 +13,7 @@ try:
 except ImportError:
     from comfy import io
 
-from ntsc_presets import PRESETS, get_preset, get_preset_names, apply_intensity_to_preset
+from .ntsc_presets import PRESETS, get_preset, get_preset_names, apply_intensity_to_preset
 
 
 class NtscRsSimpleNode(io.ComfyNode):
@@ -28,7 +28,7 @@ class NtscRsSimpleNode(io.ComfyNode):
             description="VHS/CRT effect with preset configurations. For full parameter control, use the Advanced node.",
             inputs=[
                 io.Image.Input("image", tooltip="Image to apply NTSC effect to"),
-                io.String.Combo(
+                io.Combo.Input(
                     "preset",
                     options=get_preset_names(),
                     default="vhs_classic",

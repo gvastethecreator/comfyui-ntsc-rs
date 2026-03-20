@@ -258,42 +258,32 @@ pub fn apply_ntsc_filter(py: Python, image: &PyArray3<u8>, params: &PyDict) -> P
         image_array.shape()[2],
     );
 
-    let mut input_buffer = vec![0u8; width * height * 3];
+    let mut rgb_buffer = vec![0u8; width * height * 3];
     for y in 0..height {
         for x in 0..width {
             let src_idx = (y * width + x) * channels;
             let dst_idx = (y * width + x) * 3;
-            input_buffer[dst_idx] = image_array[[y, x, 0]];
-            input_buffer[dst_idx + 1] = image_array[[y, x, 1.min(channels - 1)]];
-            input_buffer[dst_idx + 2] = image_array[[y, x, 2.min(channels - 1)]];
+            rgb_buffer[dst_idx] = image_array[[y, x, 0]];
+            rgb_buffer[dst_idx + 1] = image_array[[y, x, 1.min(channels - 1)]];
+            rgb_buffer[dst_idx + 2] = image_array[[y, x, 2.min(channels - 1)]];
         }
     }
 
     let effect = build_ntsc_effect(params);
     let frame_num = get_i32(params, "frame_num", 0);
 
+    let scratch_len = YiqView::buf_length_for((width, height), effect.use_field.to_yiq_field(0));
+    let mut scratch = vec![0f32; scratch_len];
+    let mut yiq = YiqView::from_parts(
+        &mut scratch,
+        (width, height),
+        effect.use_field.to_yiq_field(0),
+    );
+
     let row_bytes = width * pixel_bytes_for::<Rgb, u8>();
     let blit_info = BlitInfo::from_full_frame(width, height, row_bytes);
 
-    let mut scratch = vec![0.0f32; width * height * 4];
-    let field = effect.use_field.to_yiq_field(0);
-
-    {
-        let mid = width * height;
-        let (y_plane, rest) = scratch.split_at_mut(mid);
-        let (i_plane, q_plane) = rest.split_at_mut(mid);
-
-        for (i, pixel) in input_buffer.chunks(3).enumerate() {
-            let y = 0.299 * pixel[0] as f32 + 0.587 * pixel[1] as f32 + 0.114 * pixel[2] as f32;
-            let i_val = 0.596 * pixel[0] as f32 - 0.274 * pixel[1] as f32 - 0.322 * pixel[2] as f32;
-            let q_val = 0.211 * pixel[0] as f32 - 0.523 * pixel[1] as f32 + 0.312 * pixel[2] as f32;
-            y_plane[i] = y;
-            i_plane[i] = i_val;
-            q_plane[i] = q_val;
-        }
-    }
-
-    let mut yiq = YiqView::from_parts(&mut scratch, (width, height), field);
+    yiq.set_from_strided_buffer::<Rgb, u8, _>(&rgb_buffer, blit_info, ());
 
     effect.apply_effect_to_yiq(&mut yiq, frame_num as usize, [1.0, 1.0]);
 
