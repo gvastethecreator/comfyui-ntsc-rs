@@ -1,0 +1,44 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+build/
+dist/
+*.egg-info/
+
+# Rust build artifacts
+rust_binding/target/
+*.pyd
+*.so
+*.dll
+*.dylib
+
+# Wheels (keep only source wheels in repo)
+# wheels/*.whl is tracked but binary wheels should be built by CI
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# ComfyUI
+custom_nodes/
+
+# Python virtual environments
+venv/
+env/
+.venv/
+
+# Test outputs
+test_outputs/
+
+# Logs
+*.log

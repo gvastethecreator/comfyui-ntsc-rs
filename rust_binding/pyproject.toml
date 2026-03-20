@@ -1,0 +1,11 @@
+[build-system]
+requires = ["maturin>=1.0"]
+build-backend = "maturin"
+
+[project]
+name = "comfyui_ntsc_rs"
+requires-python = ">=3.10"
+dynamic = []
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
