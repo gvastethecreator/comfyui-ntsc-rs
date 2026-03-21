@@ -28,7 +28,7 @@ class NtscRsSimpleNode(io.ComfyNode):
             description="VHS/CRT effect with preset configurations. For full parameter control, use the Advanced node.",
             inputs=[
                 io.Image.Input("image", display_name="Image", tooltip="Image to apply NTSC effect to"),
-                io.Combo.Input("preset", "Preset",
+                io.Combo.Input("preset", display_name="Preset",
                     options=get_preset_names(),
                     default="vhs_classic",
                     tooltip="Preset configuration",

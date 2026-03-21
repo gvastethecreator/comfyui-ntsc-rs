@@ -36,17 +36,16 @@ class NtscRsScaleNode(io.ComfyNode):
             inputs=[
                 io.Image.Input("image", display_name="Image", tooltip="Image to process"),
 
-                io.Combo.Input(
-                    "scale_preset",
+                io.Combo.Input("scale_preset", display_name="Scale Preset",
                     options=SCALE_PRESET_OPTIONS,
                     default="Source (1x)",
                     tooltip="Output resolution preset",
                 ),
-                io.Float.Input("horizontal_scale", display_name="horizontal_scale", default=1.0, min=0.125, max=8.0, step=0.125,
+                io.Float.Input("horizontal_scale", display_name="H Scale", default=1.0, min=0.125, max=8.0, step=0.125,
                     tooltip="Horizontal scale factor"),
-                io.Float.Input("vertical_scale", display_name="vertical_scale", default=1.0, min=0.125, max=8.0, step=0.125,
+                io.Float.Input("vertical_scale", display_name="V Scale", default=1.0, min=0.125, max=8.0, step=0.125,
                     tooltip="Vertical scale factor"),
-                io.Boolean.Input("scale_with_video_size", display_name="scale_with_video_size", default=False,
+                io.Boolean.Input("scale_with_video_size", display_name="Scale With Video Size", default=False,
                     tooltip="Multiply scale by video height"),
             ],
             outputs=[

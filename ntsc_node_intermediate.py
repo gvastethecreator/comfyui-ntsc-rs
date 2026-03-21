@@ -55,7 +55,7 @@ class NtscRsIntermediateNode(io.ComfyNode):
                 io.Image.Input("image", display_name="Image", tooltip="Image to apply NTSC effect to"),
                 
                 # Preset Selection
-                io.Combo.Input("preset", "Preset",
+                io.Combo.Input("preset", display_name="Preset",
                     options=get_preset_names(),
                     default="vhs_classic",
                     tooltip="Preset configuration",
@@ -69,7 +69,7 @@ class NtscRsIntermediateNode(io.ComfyNode):
                 ),
 
                 # Scaling Section
-                io.Combo.Input("scale_preset", "Scale Preset",
+                io.Combo.Input("scale_preset", display_name="Scale Preset",
                     options=SCALE_PRESET_OPTIONS,
                     default="Source (1x)",
                     tooltip="Output resolution preset",
@@ -90,7 +90,7 @@ class NtscRsIntermediateNode(io.ComfyNode):
                 ),
 
                 # Additional Controls
-                io.Combo.Input("field_mode", "Field Mode",
+                io.Combo.Input("field_mode", display_name="Field Mode",
                     options=FIELD_MODE_OPTIONS,
                     default="InterleavedUpper",
                     tooltip="Field processing mode",

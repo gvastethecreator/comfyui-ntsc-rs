@@ -30,19 +30,17 @@ class NtscRsScanlinesNode(io.ComfyNode):
             inputs=[
                 io.Image.Input("image", display_name="Image", tooltip="Image to process"),
 
-                io.Combo.Input(
-                    "use_field",
+                io.Combo.Input("use_field", display_name="Use Field",
                     options=USE_FIELD_OPTIONS,
                     default="InterleavedUpper",
                     tooltip="Field usage mode",
                 ),
-                io.Combo.Input(
-                    "video_scanline_phase_shift",
+                io.Combo.Input("video_scanline_phase_shift", display_name="Video Scanline Phase Shift",
                     options=PHASE_SHIFT_OPTIONS,
                     default="Degrees180",
                     tooltip="Video scanline phase shift",
                 ),
-                io.Int.Input("video_scanline_phase_shift_offset", display_name="video_scanline_phase_shift_offset", default=0, min=0, max=3, step=1,
+                io.Int.Input("video_scanline_phase_shift_offset", display_name="Phase Shift Offset", default=0, min=0, max=3, step=1,
                     tooltip="Phase shift offset"),
             ],
             outputs=[

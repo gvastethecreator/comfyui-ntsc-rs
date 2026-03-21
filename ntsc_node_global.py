@@ -26,22 +26,22 @@ class NtscRsGlobalNode(io.ComfyNode):
             inputs=[
                 io.Image.Input("image", display_name="Image", tooltip="Image to process"),
 
-                io.Float.Input("snow_intensity", display_name="snow_intensity", default=0.00025, min=0.0, max=100.0, step=0.00001,
+                io.Float.Input("snow_intensity", display_name="Snow Intensity", default=0.00025, min=0.0, max=100.0, step=0.00001,
                     tooltip="Snow speckle frequency (logarithmic)"),
-                io.Float.Input("snow_anisotropy", display_name="snow_anisotropy", default=0.5, min=0.0, max=1.0, step=0.01,
+                io.Float.Input("snow_anisotropy", display_name="Snow Anisotropy", default=0.5, min=0.0, max=1.0, step=0.01,
                     tooltip="Snow anisotropy (row clustering)"),
 
-                io.Float.Input("chroma_phase_noise_intensity", display_name="chroma_phase_noise_intensity", default=0.001, min=0.0, max=1.0, step=0.0001,
+                io.Float.Input("chroma_phase_noise_intensity", display_name="Chroma Phase Noise", default=0.001, min=0.0, max=1.0, step=0.0001,
                     tooltip="Chroma phase noise intensity (logarithmic)"),
-                io.Float.Input("chroma_phase_error", display_name="chroma_phase_error", default=0.0, min=0.0, max=1.0, step=0.001,
+                io.Float.Input("chroma_phase_error", display_name="Chroma Phase Error", default=0.0, min=0.0, max=1.0, step=0.001,
                     tooltip="Chroma phase error"),
 
-                io.Float.Input("chroma_delay_horizontal", display_name="chroma_delay_horizontal", default=0.0, min=-40.0, max=40.0, step=0.1,
+                io.Float.Input("chroma_delay_horizontal", display_name="Chroma Delay H", default=0.0, min=-40.0, max=40.0, step=0.1,
                     tooltip="Horizontal chroma delay (pixels)"),
-                io.Int.Input("chroma_delay_vertical", display_name="chroma_delay_vertical", default=0, min=-20, max=20, step=1,
+                io.Int.Input("chroma_delay_vertical", display_name="Chroma Delay V", default=0, min=-20, max=20, step=1,
                     tooltip="Vertical chroma delay (scanlines)"),
 
-                io.Int.Input("random_seed", display_name="random_seed", default=0, min=-2147483648, max=2147483647, step=1,
+                io.Int.Input("random_seed", display_name="Seed", default=0, min=-2147483648, max=2147483647, step=1,
                     tooltip="Random seed for noise generation"),
             ],
             outputs=[
