@@ -23,35 +23,31 @@ class NtscRsSimpleNode(io.ComfyNode):
     def define_schema(cls) -> io.Schema:
         return io.Schema(
             node_id="NtscRs_Simple",
-            display_name="NTSC-RS (Simple)",
-            category="image/effects/ntsc",
+            display_name="NTSC-RS Simple",
+            category="NTSC",
             description="VHS/CRT effect with preset configurations. For full parameter control, use the Advanced node.",
             inputs=[
-                io.Image.Input("image", tooltip="Image to apply NTSC effect to"),
-                io.Combo.Input(
-                    "preset",
+                io.Image.Input("image", display_name="Image", tooltip="Image to apply NTSC effect to"),
+                io.Combo.Input("preset", "Preset",
                     options=get_preset_names(),
                     default="vhs_classic",
                     tooltip="Preset configuration",
                 ),
-                io.Float.Input(
-                    "intensity",
+                io.Float.Input("intensity", display_name="Intensity",
                     default=1.0,
                     min=0.0,
                     max=1.0,
                     step=0.01,
                     tooltip="Effect intensity multiplier",
                 ),
-                io.Float.Input(
-                    "saturation",
+                io.Float.Input("saturation", display_name="Saturation",
                     default=0.25,
                     min=-1.0,
                     max=2.0,
                     step=0.01,
                     tooltip="Color saturation adjustment",
                 ),
-                io.Float.Input(
-                    "random_seed",
+                io.Int.Input("random_seed", display_name="Seed",
                     default=0,
                     min=-2147483648,
                     max=2147483647,
@@ -60,7 +56,7 @@ class NtscRsSimpleNode(io.ComfyNode):
                 ),
             ],
             outputs=[
-                io.Image.Output(tooltip="Processed image"),
+                io.Image.Output(display_name="Image", tooltip="Processed image"),
             ],
             is_output_node=False,
             is_experimental=False,
@@ -70,7 +66,7 @@ class NtscRsSimpleNode(io.ComfyNode):
             is_input_list=False,
             not_idempotent=False,
             accept_all_inputs=False,
-            enable_expand=False,
+            enable_expand=True,
             search_aliases=["ntsc", "vhs", "crt", "retro"],
         )
 

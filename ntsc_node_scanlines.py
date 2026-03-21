@@ -24,11 +24,11 @@ class NtscRsScanlinesNode(io.ComfyNode):
     def define_schema(cls) -> io.Schema:
         return io.Schema(
             node_id="NtscRs_Scanlines",
-            display_name="NTSC Scanlines",
-            category="image/effects/ntsc/category",
+            display_name="NTSC-RS Scanlines",
+            category="NTSC",
             description="Field and scanline processing: field mode and scanline phase shift. Chain after other NTSC category nodes.",
             inputs=[
-                io.Image.Input("image", tooltip="Image to process"),
+                io.Image.Input("image", display_name="Image", tooltip="Image to process"),
 
                 io.Combo.Input(
                     "use_field",
@@ -42,7 +42,7 @@ class NtscRsScanlinesNode(io.ComfyNode):
                     default="Degrees180",
                     tooltip="Video scanline phase shift",
                 ),
-                io.Int.Input("video_scanline_phase_shift_offset", default=0, min=0, max=3, step=1,
+                io.Int.Input("video_scanline_phase_shift_offset", display_name="video_scanline_phase_shift_offset", default=0, min=0, max=3, step=1,
                     tooltip="Phase shift offset"),
             ],
             outputs=[
@@ -56,7 +56,7 @@ class NtscRsScanlinesNode(io.ComfyNode):
             is_input_list=False,
             not_idempotent=False,
             accept_all_inputs=False,
-            enable_expand=False,
+            enable_expand=True,
             search_aliases=["ntsc", "scanlines", "field", "interlace"],
         )
 

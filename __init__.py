@@ -141,17 +141,17 @@ NODE_CLASS_MAPPINGS = {
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     # Full nodes
-    "NtscRs_Advanced": "NTSC-RS (Advanced)",
-    "NtscRs_Simple": "NTSC-RS (Simple)",
-    "NtscRs_Intermediate": "NTSC-RS (Intermediate)",
+    "NtscRs_Advanced": "NTSC-RS Advanced",
+    "NtscRs_Simple": "NTSC-RS Simple",
+    "NtscRs_Intermediate": "NTSC-RS Intermediate",
     # Category nodes
-    "NtscRs_Signal": "NTSC Signal",
-    "NtscRs_Scanlines": "NTSC Scanlines",
-    "NtscRs_Artifacts": "NTSC Artifacts",
-    "NtscRs_Noise": "NTSC Noise",
-    "NtscRs_VHS": "NTSC VHS",
-    "NtscRs_Global": "NTSC Global",
-    "NtscRs_Scale": "NTSC Scale",
+    "NtscRs_Signal": "NTSC-RS Signal",
+    "NtscRs_Scanlines": "NTSC-RS Scanlines",
+    "NtscRs_Artifacts": "NTSC-RS Artifacts",
+    "NtscRs_Noise": "NTSC-RS Noise",
+    "NtscRs_VHS": "NTSC-RS VHS",
+    "NtscRs_Global": "NTSC-RS Global",
+    "NtscRs_Scale": "NTSC-RS Scale",
 }
 
 print("[NTSC-RS] Module initialization complete", flush=True)

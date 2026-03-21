@@ -30,11 +30,11 @@ class NtscRsScaleNode(io.ComfyNode):
     def define_schema(cls) -> io.Schema:
         return io.Schema(
             node_id="NtscRs_Scale",
-            display_name="NTSC Scale",
-            category="image/effects/ntsc/category",
+            display_name="NTSC-RS Scale",
+            category="NTSC",
             description="Resolution scaling: horizontal and vertical scale factors. Chain after other NTSC category nodes.",
             inputs=[
-                io.Image.Input("image", tooltip="Image to process"),
+                io.Image.Input("image", display_name="Image", tooltip="Image to process"),
 
                 io.Combo.Input(
                     "scale_preset",
@@ -42,11 +42,11 @@ class NtscRsScaleNode(io.ComfyNode):
                     default="Source (1x)",
                     tooltip="Output resolution preset",
                 ),
-                io.Float.Input("horizontal_scale", default=1.0, min=0.125, max=8.0, step=0.125,
+                io.Float.Input("horizontal_scale", display_name="horizontal_scale", default=1.0, min=0.125, max=8.0, step=0.125,
                     tooltip="Horizontal scale factor"),
-                io.Float.Input("vertical_scale", default=1.0, min=0.125, max=8.0, step=0.125,
+                io.Float.Input("vertical_scale", display_name="vertical_scale", default=1.0, min=0.125, max=8.0, step=0.125,
                     tooltip="Vertical scale factor"),
-                io.Boolean.Input("scale_with_video_size", default=False,
+                io.Boolean.Input("scale_with_video_size", display_name="scale_with_video_size", default=False,
                     tooltip="Multiply scale by video height"),
             ],
             outputs=[
@@ -60,7 +60,7 @@ class NtscRsScaleNode(io.ComfyNode):
             is_input_list=False,
             not_idempotent=False,
             accept_all_inputs=False,
-            enable_expand=False,
+            enable_expand=True,
             search_aliases=["ntsc", "scale", "resolution", "size", "resize"],
         )
 

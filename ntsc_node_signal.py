@@ -26,11 +26,11 @@ class NtscRsSignalNode(io.ComfyNode):
     def define_schema(cls) -> io.Schema:
         return io.Schema(
             node_id="NtscRs_Signal",
-            display_name="NTSC Signal",
-            category="image/effects/ntsc/category",
+            display_name="NTSC-RS Signal",
+            category="NTSC",
             description="Signal processing: filter type, luma/chroma filters, smear, and sharpening. Chain after other NTSC category nodes.",
             inputs=[
-                io.Image.Input("image", tooltip="Image to process"),
+                io.Image.Input("image", display_name="Image", tooltip="Image to process"),
 
                 io.Combo.Input(
                     "filter_type",
@@ -62,11 +62,11 @@ class NtscRsSignalNode(io.ComfyNode):
                     default="Full",
                     tooltip="Output chroma low-pass filter",
                 ),
-                io.Float.Input("luma_smear", default=0.5, min=0.0, max=1.0, step=0.01,
+                io.Float.Input("luma_smear", display_name="luma_smear", default=0.5, min=0.0, max=1.0, step=0.01,
                     tooltip="Luminance smear amount"),
-                io.Float.Input("composite_sharpening", default=1.0, min=-1.0, max=2.0, step=0.01,
+                io.Float.Input("composite_sharpening", display_name="composite_sharpening", default=1.0, min=-1.0, max=2.0, step=0.01,
                     tooltip="Composite sharpening/preemphasis"),
-                io.Boolean.Input("chroma_vert_blend", default=True,
+                io.Boolean.Input("chroma_vert_blend", display_name="chroma_vert_blend", default=True,
                     tooltip="Vertically blend chroma between scanlines"),
             ],
             outputs=[
@@ -80,7 +80,7 @@ class NtscRsSignalNode(io.ComfyNode):
             is_input_list=False,
             not_idempotent=False,
             accept_all_inputs=False,
-            enable_expand=False,
+            enable_expand=True,
             search_aliases=["ntsc", "signal", "filter", "luma", "chroma"],
         )
 

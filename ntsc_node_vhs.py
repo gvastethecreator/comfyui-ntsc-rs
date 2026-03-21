@@ -23,11 +23,11 @@ class NtscRsVHSNode(io.ComfyNode):
     def define_schema(cls) -> io.Schema:
         return io.Schema(
             node_id="NtscRs_VHS",
-            display_name="NTSC VHS",
-            category="image/effects/ntsc/category",
+            display_name="NTSC-RS VHS",
+            category="NTSC",
             description="VHS-specific effects: tape speed, chroma loss, sharpening, edge wave. Chain after other NTSC category nodes.",
             inputs=[
-                io.Image.Input("image", tooltip="Image to process"),
+                io.Image.Input("image", display_name="Image", tooltip="Image to process"),
 
                 io.Combo.Input(
                     "vhs_tape_speed",
@@ -35,28 +35,28 @@ class NtscRsVHSNode(io.ComfyNode):
                     default="SP",
                     tooltip="VHS tape speed (affects high-frequency cutoff)",
                 ),
-                io.Float.Input("vhs_chroma_loss", default=0.000025, min=0.0, max=1.0, step=0.000001,
+                io.Float.Input("vhs_chroma_loss", display_name="vhs_chroma_loss", default=0.000025, min=0.0, max=1.0, step=0.000001,
                     tooltip="Chroma loss probability per scanline"),
 
-                io.Boolean.Input("vhs_sharpen_enabled", default=True,
+                io.Boolean.Input("vhs_sharpen_enabled", display_name="vhs_sharpen_enabled", default=True,
                     tooltip="Enable VHS sharpening"),
-                io.Float.Input("vhs_sharpen_intensity", default=0.25, min=0.0, max=5.0, step=0.01,
+                io.Float.Input("vhs_sharpen_intensity", display_name="vhs_sharpen_intensity", default=0.25, min=0.0, max=5.0, step=0.01,
                     tooltip="VHS sharpen intensity"),
-                io.Float.Input("vhs_sharpen_frequency", default=1.0, min=0.5, max=4.0, step=0.01,
+                io.Float.Input("vhs_sharpen_frequency", display_name="vhs_sharpen_frequency", default=1.0, min=0.5, max=4.0, step=0.01,
                     tooltip="VHS sharpen frequency"),
 
-                io.Boolean.Input("vhs_edge_wave_enabled", default=True,
+                io.Boolean.Input("vhs_edge_wave_enabled", display_name="vhs_edge_wave_enabled", default=True,
                     tooltip="Enable edge wave effect"),
-                io.Float.Input("vhs_edge_wave_intensity", default=0.5, min=0.0, max=20.0, step=0.01,
+                io.Float.Input("vhs_edge_wave_intensity", display_name="vhs_edge_wave_intensity", default=0.5, min=0.0, max=20.0, step=0.01,
                     tooltip="Edge wave intensity (pixels)"),
-                io.Float.Input("vhs_edge_wave_speed", default=4.0, min=0.0, max=10.0, step=0.1,
+                io.Float.Input("vhs_edge_wave_speed", display_name="vhs_edge_wave_speed", default=4.0, min=0.0, max=10.0, step=0.1,
                     tooltip="Edge wave speed"),
-                io.Float.Input("vhs_edge_wave_frequency", default=0.05, min=0.0, max=0.5, step=0.001,
+                io.Float.Input("vhs_edge_wave_frequency", display_name="vhs_edge_wave_frequency", default=0.05, min=0.0, max=0.5, step=0.001,
                     tooltip="Edge wave frequency"),
-                io.Int.Input("vhs_edge_wave_detail", default=2, min=1, max=5, step=1,
+                io.Int.Input("vhs_edge_wave_detail", display_name="vhs_edge_wave_detail", default=2, min=1, max=5, step=1,
                     tooltip="Edge wave detail (octaves)"),
 
-                io.Int.Input("random_seed", default=0, min=-2147483648, max=2147483647, step=1,
+                io.Int.Input("random_seed", display_name="random_seed", default=0, min=-2147483648, max=2147483647, step=1,
                     tooltip="Random seed for noise generation"),
             ],
             outputs=[
@@ -70,7 +70,7 @@ class NtscRsVHSNode(io.ComfyNode):
             is_input_list=False,
             not_idempotent=False,
             accept_all_inputs=False,
-            enable_expand=False,
+            enable_expand=True,
             search_aliases=["ntsc", "vhs", "tape", "chroma", "sharpen", "edge", "wave"],
         )
 

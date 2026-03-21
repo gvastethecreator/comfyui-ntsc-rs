@@ -48,21 +48,19 @@ class NtscRsIntermediateNode(io.ComfyNode):
     def define_schema(cls) -> io.Schema:
         return io.Schema(
             node_id="NtscRs_Intermediate",
-            display_name="NTSC-RS (Intermediate)",
-            category="image/effects/ntsc",
+            display_name="NTSC-RS Intermediate",
+            category="NTSC",
             description="VHS/CRT effect with preset configurations and scaling controls. Balance between simplicity and full parameter control.",
             inputs=[
-                io.Image.Input("image", tooltip="Image to apply NTSC effect to"),
+                io.Image.Input("image", display_name="Image", tooltip="Image to apply NTSC effect to"),
                 
                 # Preset Selection
-                io.Combo.Input(
-                    "preset",
+                io.Combo.Input("preset", "Preset",
                     options=get_preset_names(),
                     default="vhs_classic",
                     tooltip="Preset configuration",
                 ),
-                io.Float.Input(
-                    "intensity",
+                io.Float.Input("intensity", display_name="Intensity",
                     default=1.0,
                     min=0.0,
                     max=1.0,
@@ -71,22 +69,19 @@ class NtscRsIntermediateNode(io.ComfyNode):
                 ),
 
                 # Scaling Section
-                io.Combo.Input(
-                    "scale_preset",
+                io.Combo.Input("scale_preset", "Scale Preset",
                     options=SCALE_PRESET_OPTIONS,
                     default="Source (1x)",
                     tooltip="Output resolution preset",
                 ),
-                io.Float.Input(
-                    "horizontal_scale",
+                io.Float.Input("horizontal_scale", display_name="H Scale",
                     default=1.0,
                     min=0.125,
                     max=8.0,
                     step=0.125,
                     tooltip="Horizontal scale factor (for Custom preset)",
                 ),
-                io.Float.Input(
-                    "vertical_scale", 
+                io.Float.Input("vertical_scale", display_name="V Scale", 
                     default=1.0,
                     min=0.125,
                     max=8.0,
@@ -95,14 +90,12 @@ class NtscRsIntermediateNode(io.ComfyNode):
                 ),
 
                 # Additional Controls
-                io.Combo.Input(
-                    "field_mode",
+                io.Combo.Input("field_mode", "Field Mode",
                     options=FIELD_MODE_OPTIONS,
                     default="InterleavedUpper",
                     tooltip="Field processing mode",
                 ),
-                io.Int.Input(
-                    "random_seed",
+                io.Int.Input("random_seed", display_name="Seed",
                     default=0,
                     min=-2147483648,
                     max=2147483647,
@@ -111,7 +104,7 @@ class NtscRsIntermediateNode(io.ComfyNode):
                 ),
             ],
             outputs=[
-                io.Image.Output(tooltip="Processed image"),
+                io.Image.Output(display_name="Image", tooltip="Processed image"),
             ],
             is_output_node=False,
             is_experimental=False,
@@ -121,7 +114,7 @@ class NtscRsIntermediateNode(io.ComfyNode):
             is_input_list=False,
             not_idempotent=False,
             accept_all_inputs=False,
-            enable_expand=False,
+            enable_expand=True,
             search_aliases=["ntsc", "vhs", "crt", "retro", "scaled", "intermediate"],
         )
 
