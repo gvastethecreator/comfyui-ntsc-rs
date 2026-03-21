@@ -57,8 +57,8 @@ Each node applies ONLY its category of effects, allowing flexible pipelines:
 cd path/to/ComfyUI/custom_nodes
 
 # Clone this repository
-git clone https://github.com/YOUR_USERNAME/comfyui-ntscrs.git
-cd comfyui-ntscrs
+git clone https://github.com/gvastethecreator/comfyui-ntsc-rs.git
+cd comfyui-ntsc-rs
 
 # Install the pre-built wheel for your Python environment
 pip install wheels/comfyui_ntsc_rs-0.1.0-cp312-cp312-win_amd64.whl
@@ -75,8 +75,8 @@ If you need to rebuild the native extension:
 pip install maturin
 
 # Clone and build
-git clone https://github.com/YOUR_USERNAME/comfyui-ntscrs.git
-cd comfyui-ntscrs
+git clone https://github.com/gvastethecreator/comfyui-ntsc-rs.git
+cd comfyui-ntsc-rs
 python build_node.py
 ```
 
@@ -172,7 +172,7 @@ PyTorch [B,H,W,C] float32
 ## Project Structure
 
 ```
-comfyui-ntscrs/
+comfyui-ntsc-rs/
 ├── __init__.py                 # ComfyUI extension entry point
 ├── ntsc_node.py               # Advanced node (60+ parameters)
 ├── ntsc_node_simple.py         # Simple preset-based node
