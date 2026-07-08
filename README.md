@@ -1,5 +1,14 @@
 # ComfyUI NTSC-RS
 
+<!-- IMAGE PLACEHOLDER - Add your preview images here -->
+<!-- 
+![NTSC-RS Preview](assets/preview.gif)
+![NTSC-RS Nodes](assets/nodes.png)
+-->
+[![GitHub stars](https://img.shields.io/github/stars/YOUR_USERNAME/comfyui-ntscrs?style=social)](https://github.com/YOUR_USERNAME/comfyui-ntscrs)
+[![License](https://img.shields.io/badge/license-MIT%2FISC%2FApache--2.0-blue)](LICENSE)
+[![Rust](https://img.shields.io/badge/rust-1.85%2B-orange)](https://rustup.rs/)
+
 ================================================================================
 Native VHS/CRT/NTSC Video Effect Processing for ComfyUI
 ================================================================================
@@ -16,6 +25,19 @@ native PyO3 bindings.
 - **14 VHS/CRT Presets** - Quick access to classic looks
 - **Chainable Nodes** - Combine category-specific nodes for custom pipelines
 - **1:1 Quality** - Direct access to ntsc-rs `apply_effect_to_yiq()`
+
+## Quick Preview
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  BEFORE                        AFTER (VHS Classic)                        │
+│  ┌─────────┐                  ┌─────────┐                                 │
+│  │         │    ───────►      │ ░░░░░░░ │                                 │
+│  │  Clean  │                  │ ░ VHS ░ │                                 │
+│  │  Image  │                  │ ░░░░░░░ │                                 │
+│  └─────────┘                  └─────────┘                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
 
 ## Nodes Overview
 
@@ -41,13 +63,6 @@ Each node applies ONLY its category of effects, allowing flexible pipelines:
 | **NTSC-RS Global** | Snow speckles, chroma phase, delays |
 | **NTSC-RS Scale** | Resolution scaling (H/V) |
 
-## Requirements
-
-- Python 3.10+
-- ComfyUI (latest)
-- Windows, Linux, or macOS
-- Rust toolchain (1.85+) - only for building from source
-
 ## Installation
 
 ### Option 1: Pre-built Wheel (Recommended)
@@ -57,8 +72,8 @@ Each node applies ONLY its category of effects, allowing flexible pipelines:
 cd path/to/ComfyUI/custom_nodes
 
 # Clone this repository
-git clone https://github.com/gvastethecreator/comfyui-ntsc-rs.git
-cd comfyui-ntsc-rs
+git clone https://github.com/YOUR_USERNAME/comfyui-ntscrs.git
+cd comfyui-ntscrs
 
 # Install the pre-built wheel for your Python environment
 pip install wheels/comfyui_ntsc_rs-0.1.0-cp312-cp312-win_amd64.whl
@@ -75,10 +90,14 @@ If you need to rebuild the native extension:
 pip install maturin
 
 # Clone and build
-git clone https://github.com/gvastethecreator/comfyui-ntsc-rs.git
-cd comfyui-ntsc-rs
+git clone https://github.com/YOUR_USERNAME/comfyui-ntscrs.git
+cd comfyui-ntscrs
 python build_node.py
 ```
+
+Requirements for building:
+- Rust toolchain (1.85+ for Rust 2024 edition support)
+- Maturin (`pip install maturin`)
 
 ### Post-Installation
 
@@ -151,6 +170,27 @@ Image → [NTSC-RS Advanced] → Output
 | Test Pattern | Technical test signal |
 | Cassette Recorder | Audio cassette tape emulation |
 
+## Changelog
+
+### [0.1.0] - 2026-03-21
+
+#### Added
+- 10 node types: 3 Full + 7 Chainable category nodes
+- 14 VHS/CRT presets
+- Native PyO3 Rust binding (no subprocess)
+- `ntsc-rs` library via vendored copy
+- ASCII-formatted startup logs
+- VS Code tasks.json for build/deploy
+
+#### Fixed
+- Scale node now performs actual image resizing via PyTorch (was using ntsc-rs internal scale params which don't change dimensions)
+- Intermediate node now performs actual image resizing
+- All category nodes properly disable non-relevant effects for optimized processing
+
+#### Changed
+- README updated with better documentation and image placeholders
+- All nodes now use `display_name` for readable labels in ComfyUI UI
+
 ## Tensor Processing Pipeline
 
 ```
@@ -169,14 +209,29 @@ numpy [H,W,C] uint8
 PyTorch [B,H,W,C] float32
 ```
 
-## Project Structure
+## Development
+
+### VS Code Tasks
+
+Press `Ctrl+Shift+P` and type "Run Task" to access:
+
+| Task | Description |
+|------|-------------|
+| Build Rust Extension | Builds the PyO3 Rust extension |
+| Copy to ComfyUI | Copies all files to ComfyUI custom_nodes |
+| Build & Copy All | Builds and copies in one step |
+| Copy Python Files Only | Quick Python-only sync |
+| Clear ComfyUI Cache | Removes __pycache__ folders |
+| Full Deploy Cycle | Build + Copy + Clear cache |
+
+### Project Structure
 
 ```
-comfyui-ntsc-rs/
+comfyui-ntscrs/
 ├── __init__.py                 # ComfyUI extension entry point
 ├── ntsc_node.py               # Advanced node (60+ parameters)
 ├── ntsc_node_simple.py         # Simple preset-based node
-├── ntsc_node_intermediate.py   # Intermediate with scaling
+├── ntsc_node_intermediate.py    # Intermediate with scaling
 ├── ntsc_presets.py            # 14 preset definitions
 │
 ├── ntsc_node_signal.py         # Category: Signal processing
@@ -194,6 +249,9 @@ comfyui-ntsc-rs/
 │   ├── Cargo.toml
 │   ├── pyproject.toml
 │   └── src/lib.rs
+├── .vscode/
+│   ├── settings.json
+│   └── tasks.json
 └── vendor/                    # Vendored ntsc-rs
     ├── ntscrs/
     └── macros/
@@ -223,6 +281,13 @@ If not, install from https://rustup.rs/
 1. Check ComfyUI console for `[NTSC-RS]` log messages
 2. Ensure the extension loaded without errors
 3. Try clearing `__pycache__` in the custom_nodes folder
+4. Restart ComfyUI completely
+
+### Scale/Resize not working
+
+The Scale node uses PyTorch interpolation for actual resizing. The ntsc-rs
+internal `horizontal_scale` and `vertical_scale` parameters only affect signal
+processing (filter bandwidth), not image dimensions.
 
 ## Building Wheels for Other Platforms
 
@@ -251,15 +316,21 @@ This allows chaining without unnecessary computation.
 
 The underlying ntsc-rs library provides:
 
-- **Signal Processing**: 7 parameters (filter types, smear, sharpening)
-- **Field Processing**: 3 parameters (field mode, phase)
-- **VHS Artifacts**: 13 parameters (head switching, tracking)
-- **Noise Layers**: 15 parameters (composite, luma, chroma, ringing)
-- **VHS Effects**: 9 parameters (tape speed, chroma loss, sharpen, edge wave)
-- **Global Effects**: 6 parameters (snow, chroma phase, delays)
-- **Scaling**: 4 parameters (horizontal, vertical, video-size)
+| Category | Parameters |
+|----------|------------|
+| Signal Processing | 7 (filter types, smear, sharpening) |
+| Field Processing | 3 (field mode, phase) |
+| VHS Artifacts | 13 (head switching, tracking) |
+| Noise Layers | 15 (composite, luma, chroma, ringing) |
+| VHS Effects | 9 (tape speed, chroma loss, sharpen, edge wave) |
+| Global Effects | 6 (snow, chroma phase, delays) |
+| Scaling | 4 (horizontal, vertical, video-size) |
 
 **Total: 60+ parameters**
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit issues or pull requests.
 
 ## License
 

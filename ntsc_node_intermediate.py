@@ -2,9 +2,13 @@
 
 This node provides preset-based VHS/CRT looks with additional
 control over resolution scaling and output size.
+
+Note: Resolution scaling is done via PyTorch interpolation, not ntsc-rs
+internal scale parameters (which affect signal processing, not dimensions).
 """
 
 import torch
+import torch.nn.functional as F
 import numpy as np
 from typing import Tuple
 
@@ -27,18 +31,18 @@ SCALE_PRESET_OPTIONS = [
 FIELD_MODE_OPTIONS = ["InterleavedUpper", "InterleavedLower", "Both", "Alternating"]
 
 
-def get_scale_values(preset: str, scale_preset: str, custom_h: float, custom_v: float) -> Tuple[float, float, bool]:
+def get_scale_values(preset: str, scale_preset: str, custom_h: float, custom_v: float) -> Tuple[float, float]:
     """Get horizontal and vertical scale values based on preset selection."""
     if scale_preset == "Source (1x)":
-        return 1.0, 1.0, False
+        return 1.0, 1.0
     elif scale_preset == "Half (0.5x)":
-        return 0.5, 0.5, False
+        return 0.5, 0.5
     elif scale_preset == "Quarter (0.25x)":
-        return 0.25, 0.25, False
+        return 0.25, 0.25
     elif scale_preset == "Double (2x)":
-        return 2.0, 2.0, False
+        return 2.0, 2.0
     else:  # Custom
-        return custom_h, custom_v, True
+        return custom_h, custom_v
 
 
 class NtscRsIntermediateNode(io.ComfyNode):
@@ -140,23 +144,13 @@ class NtscRsIntermediateNode(io.ComfyNode):
         preset_config["random_seed"] = random_seed
         preset_config["use_field"] = field_mode
 
+        h_scale, v_scale = get_scale_values(preset, scale_preset, horizontal_scale, vertical_scale)
+
         # Apply intensity to noise parameters
         if intensity < 1.0:
             current_preset = apply_intensity_to_preset(preset_config, intensity)
         else:
             current_preset = preset_config.copy()
-
-        # Override scale settings
-        if scale_preset != "Custom":
-            h_scale, v_scale, use_custom = get_scale_values(preset, scale_preset, horizontal_scale, vertical_scale)
-            current_preset["horizontal_scale"] = h_scale
-            current_preset["vertical_scale"] = v_scale
-            current_preset["scale_with_video_size"] = False
-        else:
-            current_preset["horizontal_scale"] = horizontal_scale
-            current_preset["vertical_scale"] = vertical_scale
-            current_preset["scale_with_video_size"] = False
-            current_preset["scale_enabled"] = True
 
         for i in range(batch_size):
             img = image[i]
@@ -165,8 +159,22 @@ class NtscRsIntermediateNode(io.ComfyNode):
             result = comfyui_ntsc_rs.apply_ntsc_filter(img_np, current_preset)
 
             result_float = torch.from_numpy(result).float() / 255.0
+            
+            if h_scale != 1.0 or v_scale != 1.0:
+                new_height = int(height * v_scale)
+                new_width = int(width * h_scale)
+                
+                result_float = result_float.permute(2, 0, 1)
+                result_float = result_float.unsqueeze(0)
+                result_float = F.interpolate(
+                    result_float,
+                    size=(new_height, new_width),
+                    mode='bilinear',
+                    align_corners=False
+                )
+                result_float = result_float.squeeze(0).permute(1, 2, 0)
+            
             result_float = torch.clamp(result_float, 0.0, 1.0)
-
             results.append(result_float)
 
         output = torch.stack(results, dim=0)
