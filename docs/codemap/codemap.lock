@@ -1,0 +1,50 @@
+{
+  "current_commit": "3b0623af68dfde1c58ad16a6445abd7098c7ab05",
+  "working_tree_dirty": true,
+  "generated_at": "2026-08-08T09:49:51Z",
+  "scanned_scope": [
+    "."
+  ],
+  "excluded_directories": [
+    ".cache",
+    ".git",
+    ".hg",
+    ".next",
+    ".nuxt",
+    ".svn",
+    ".turbo",
+    ".venv",
+    "__pycache__",
+    "build",
+    "coverage",
+    "dist",
+    "docs/codemap",
+    "generated",
+    "node_modules",
+    "out",
+    "target",
+    "vendor",
+    "venv"
+  ],
+  "fingerprint_algorithm": "sha256-path-content-v1",
+  "modules": [
+    {
+      "id": ".",
+      "path": ".",
+      "file_count": 18,
+      "fingerprint": "29261e08f50fd1fa993f9632a87c78f0f7b8ed5153252f02d9ad077ac54b52fe"
+    },
+    {
+      "id": "rust_binding",
+      "path": "rust_binding",
+      "file_count": 4,
+      "fingerprint": "89cb65af9b736eb93845ef09c2be915ad6cdfb4133d198a73c8dbbc57d5a91e9"
+    },
+    {
+      "id": "wheels",
+      "path": "wheels",
+      "file_count": 1,
+      "fingerprint": "ab23c380ff428d3077a07f4cbf551fa4d6b040b8df00d5c8669b1c56e88b3627"
+    }
+  ]
+}

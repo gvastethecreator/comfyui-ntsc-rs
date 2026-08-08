@@ -1,0 +1,170 @@
+{
+  "generated_at": "2026-08-08T09:49:51Z",
+  "generated_from_commit": "3b0623af68dfde1c58ad16a6445abd7098c7ab05",
+  "scope": [
+    "."
+  ],
+  "nodes": [
+    {
+      "id": "external-dependencies",
+      "path": "__init__.py",
+      "role": "Represents external packages referenced by tracked source files.",
+      "type": "external",
+      "boundary": "External",
+      "entrypoints": [
+        "__init__.py:comfy_api.latest"
+      ],
+      "tests": [],
+      "constraints": [
+        "Only dependencies with literal tracked-source references appear here."
+      ],
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "__init__.py",
+            "symbol": "comfy_api.latest"
+          }
+        ]
+      }
+    },
+    {
+      "id": "repository",
+      "path": "__init__.py",
+      "role": "Owns the tracked files for the repository module.",
+      "type": "module",
+      "boundary": "Repository",
+      "entrypoints": [
+        "__init__.py:NtscRsExtension"
+      ],
+      "tests": [],
+      "constraints": [
+        "This baseline uses tracked source and explicit dependency references only."
+      ],
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "__init__.py",
+            "symbol": "NtscRsExtension"
+          }
+        ]
+      }
+    },
+    {
+      "id": "rust-binding",
+      "path": "rust_binding",
+      "role": "Owns the tracked files for the rust_binding module.",
+      "type": "module",
+      "boundary": "Rust_Binding",
+      "entrypoints": [
+        "rust_binding/src/lib.rs:parse_use_field"
+      ],
+      "tests": [],
+      "constraints": [
+        "This baseline uses tracked source and explicit dependency references only."
+      ],
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "rust_binding/src/lib.rs",
+            "symbol": "parse_use_field"
+          }
+        ]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "repository",
+      "to": "external-dependencies",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "__init__.py",
+            "symbol": "comfy_api.latest"
+          },
+          {
+            "path": "build_node.py",
+            "symbol": "pathlib"
+          },
+          {
+            "path": "build_node.py",
+            "symbol": "subprocess"
+          },
+          {
+            "path": "build_node.py",
+            "symbol": "sys"
+          },
+          {
+            "path": "build_node.py",
+            "symbol": "os"
+          },
+          {
+            "path": "build_node.py",
+            "symbol": "shutil"
+          },
+          {
+            "path": "build_node.py",
+            "symbol": "argparse"
+          },
+          {
+            "path": "ntsc_node.py",
+            "symbol": "typing"
+          }
+        ]
+      }
+    },
+    {
+      "from": "rust-binding",
+      "to": "external-dependencies",
+      "type": "imports",
+      "evidence": {
+        "status": "verified",
+        "locations": [
+          {
+            "path": "rust_binding/src/lib.rs",
+            "symbol": "numpy"
+          },
+          {
+            "path": "rust_binding/src/lib.rs",
+            "symbol": "pyo3"
+          },
+          {
+            "path": "rust_binding/src/lib.rs",
+            "symbol": "ntsc_rs"
+          }
+        ]
+      }
+    }
+  ],
+  "flows": [
+    {
+      "trigger": "Tracked reference __init__.py:comfy_api.latest",
+      "steps": [
+        "repository",
+        "external-dependencies"
+      ],
+      "outcome": "The verified dependency path reaches external-dependencies through 1 step(s)."
+    },
+    {
+      "trigger": "Tracked reference rust_binding/src/lib.rs:numpy",
+      "steps": [
+        "rust-binding",
+        "external-dependencies"
+      ],
+      "outcome": "The verified dependency path reaches external-dependencies through 1 step(s)."
+    },
+    {
+      "trigger": "Tracked reference build_node.py:pathlib",
+      "steps": [
+        "repository",
+        "external-dependencies"
+      ],
+      "outcome": "The verified dependency reaches external-dependencies."
+    }
+  ]
+}
