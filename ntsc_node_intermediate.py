@@ -7,31 +7,25 @@ Note: Resolution scaling is done via PyTorch interpolation, not ntsc-rs
 internal scale parameters (which affect signal processing, not dimensions).
 """
 
+import numpy as np
 import torch
 import torch.nn.functional as F
-import numpy as np
-from typing import Tuple
 
 try:
     from comfy_api.latest import io
 except ImportError:
     from comfy import io
 
-from .ntsc_presets import PRESETS, get_preset, get_preset_names, apply_intensity_to_preset
+from .ntsc_presets import apply_intensity_to_preset, get_preset, get_preset_names
 
-
-SCALE_PRESET_OPTIONS = [
-    "Source (1x)", 
-    "Half (0.5x)", 
-    "Quarter (0.25x)",
-    "Double (2x)", 
-    "Custom"
-]
+SCALE_PRESET_OPTIONS = ["Source (1x)", "Half (0.5x)", "Quarter (0.25x)", "Double (2x)", "Custom"]
 
 FIELD_MODE_OPTIONS = ["InterleavedUpper", "InterleavedLower", "Both", "Alternating"]
 
 
-def get_scale_values(preset: str, scale_preset: str, custom_h: float, custom_v: float) -> Tuple[float, float]:
+def get_scale_values(
+    preset: str, scale_preset: str, custom_h: float, custom_v: float
+) -> tuple[float, float]:
     """Get horizontal and vertical scale values based on preset selection."""
     if scale_preset == "Source (1x)":
         return 1.0, 1.0
@@ -56,50 +50,63 @@ class NtscRsIntermediateNode(io.ComfyNode):
             category="NTSC",
             description="VHS/CRT effect with preset configurations and scaling controls. Balance between simplicity and full parameter control.",
             inputs=[
-                io.Image.Input("image", display_name="Image", tooltip="Image to apply NTSC effect to"),
-                
+                io.Image.Input(
+                    "image", display_name="Image", tooltip="Image to apply NTSC effect to"
+                ),
                 # Preset Selection
-                io.Combo.Input("preset", display_name="Preset",
+                io.Combo.Input(
+                    "preset",
+                    display_name="Preset",
                     options=get_preset_names(),
                     default="vhs_classic",
                     tooltip="Preset configuration",
                 ),
-                io.Float.Input("intensity", display_name="Intensity",
+                io.Float.Input(
+                    "intensity",
+                    display_name="Intensity",
                     default=1.0,
                     min=0.0,
                     max=1.0,
                     step=0.01,
                     tooltip="Effect intensity multiplier",
                 ),
-
                 # Scaling Section
-                io.Combo.Input("scale_preset", display_name="Scale Preset",
+                io.Combo.Input(
+                    "scale_preset",
+                    display_name="Scale Preset",
                     options=SCALE_PRESET_OPTIONS,
                     default="Source (1x)",
                     tooltip="Output resolution preset",
                 ),
-                io.Float.Input("horizontal_scale", display_name="H Scale",
+                io.Float.Input(
+                    "horizontal_scale",
+                    display_name="H Scale",
                     default=1.0,
                     min=0.125,
                     max=8.0,
                     step=0.125,
                     tooltip="Horizontal scale factor (for Custom preset)",
                 ),
-                io.Float.Input("vertical_scale", display_name="V Scale", 
+                io.Float.Input(
+                    "vertical_scale",
+                    display_name="V Scale",
                     default=1.0,
                     min=0.125,
                     max=8.0,
                     step=0.125,
                     tooltip="Vertical scale factor (for Custom preset)",
                 ),
-
                 # Additional Controls
-                io.Combo.Input("field_mode", display_name="Field Mode",
+                io.Combo.Input(
+                    "field_mode",
+                    display_name="Field Mode",
                     options=FIELD_MODE_OPTIONS,
                     default="InterleavedUpper",
                     tooltip="Field processing mode",
                 ),
-                io.Int.Input("random_seed", display_name="Seed",
+                io.Int.Input(
+                    "random_seed",
+                    display_name="Seed",
                     default=0,
                     min=-2147483648,
                     max=2147483647,
@@ -123,10 +130,21 @@ class NtscRsIntermediateNode(io.ComfyNode):
         )
 
     @classmethod
-    def process(cls, image, preset, intensity, scale_preset, horizontal_scale, vertical_scale, field_mode, random_seed):
+    def process(
+        cls,
+        image,
+        preset,
+        intensity,
+        scale_preset,
+        horizontal_scale,
+        vertical_scale,
+        field_mode,
+        random_seed,
+    ):
         """Process the image through the NTSC effect."""
         try:
             import comfyui_ntsc_rs
+
             HAS_RUST = True
         except ImportError:
             HAS_RUST = False
@@ -159,21 +177,18 @@ class NtscRsIntermediateNode(io.ComfyNode):
             result = comfyui_ntsc_rs.apply_ntsc_filter(img_np, current_preset)
 
             result_float = torch.from_numpy(result).float() / 255.0
-            
+
             if h_scale != 1.0 or v_scale != 1.0:
                 new_height = int(height * v_scale)
                 new_width = int(width * h_scale)
-                
+
                 result_float = result_float.permute(2, 0, 1)
                 result_float = result_float.unsqueeze(0)
                 result_float = F.interpolate(
-                    result_float,
-                    size=(new_height, new_width),
-                    mode='bilinear',
-                    align_corners=False
+                    result_float, size=(new_height, new_width), mode="bilinear", align_corners=False
                 )
                 result_float = result_float.squeeze(0).permute(1, 2, 0)
-            
+
             result_float = torch.clamp(result_float, 0.0, 1.0)
             results.append(result_float)
 
@@ -181,5 +196,24 @@ class NtscRsIntermediateNode(io.ComfyNode):
         return io.NodeOutput(output)
 
     @classmethod
-    async def execute(cls, image, preset, intensity, scale_preset, horizontal_scale, vertical_scale, field_mode, random_seed):
-        return cls.process(image, preset, intensity, scale_preset, horizontal_scale, vertical_scale, field_mode, random_seed)
+    async def execute(
+        cls,
+        image,
+        preset,
+        intensity,
+        scale_preset,
+        horizontal_scale,
+        vertical_scale,
+        field_mode,
+        random_seed,
+    ):
+        return cls.process(
+            image,
+            preset,
+            intensity,
+            scale_preset,
+            horizontal_scale,
+            vertical_scale,
+            field_mode,
+            random_seed,
+        )

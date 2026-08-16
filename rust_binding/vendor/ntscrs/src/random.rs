@@ -1,3 +1,4 @@
+use rand::RngExt;
 use rand::distr::Distribution;
 use siphasher::sip::SipHasher;
 use std::hash::{Hash, Hasher};

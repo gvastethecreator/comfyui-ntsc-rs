@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Native VHS, CRT, and NTSC signal processing nodes for ComfyUI, powered by Rust."
+    />
+    <meta name="theme-color" content="#e9e2d4" />
+    <title>ComfyUI NTSC-RS — Native analog signal effects</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="ComfyUI NTSC-RS home">
+        <span class="brand-mark" aria-hidden="true">NTSC</span>
+        <span>ComfyUI / RS</span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="#signals">Signals</a>
+        <a href="#nodes">Nodes</a>
+        <a href="#install">Install</a>
+        <a href="https://github.com/gvastethecreator/comfyui-ntsc-rs">GitHub</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top">
+        <div class="hero-copy">
+          <p class="eyebrow">Native signal processing for ComfyUI</p>
+          <h1>Break the signal.<br />Keep the frame.</h1>
+          <p class="hero-intro">
+            Ten focused nodes carry image tensors through a native Rust NTSC pipeline. Build
+            convincing tape wear, CRT softness, chroma drift, scanlines, and signal noise without
+            leaving your ComfyUI graph.
+          </p>
+          <div class="actions">
+            <a class="button button-primary" href="#install">Install from source</a>
+            <a class="button" href="https://github.com/gvastethecreator/comfyui-ntsc-rs">View code</a>
+          </div>
+          <dl class="stats" aria-label="Project summary">
+            <div><dt>10</dt><dd>nodes</dd></div>
+            <div><dt>14</dt><dd>presets</dd></div>
+            <div><dt>Rust</dt><dd>native core</dd></div>
+          </dl>
+        </div>
+        <figure class="hero-figure">
+          <div class="frame frame-source">
+            <img src="assets/gallery/source.webp" width="1200" height="800" fetchpriority="high" decoding="async" alt="Matte television, blue sphere, and red paper ribbon before processing" />
+            <span>Input / clean</span>
+          </div>
+          <div class="frame frame-output">
+            <img src="assets/gallery/vhs-classic.webp" width="1200" height="800" fetchpriority="high" decoding="async" alt="The same still life after the VHS Classic preset" />
+            <span>Output / VHS Classic</span>
+          </div>
+        </figure>
+      </section>
+
+      <section class="signal-gallery" id="signals" aria-labelledby="signals-title">
+        <div class="section-heading">
+          <p class="eyebrow">Real native output</p>
+          <h2 id="signals-title">One frame. Three damaged signals.</h2>
+          <p>Every result below came from the compiled extension and the presets in this repository.</p>
+        </div>
+        <div class="gallery-grid">
+          <figure>
+            <img src="assets/gallery/vhs-classic.webp" width="1200" height="800" loading="lazy" decoding="async" alt="VHS Classic output with tape edge distortion and chroma bleed" />
+            <figcaption><strong>VHS Classic</strong><span>Tape edge shift · color bleed</span></figcaption>
+          </figure>
+          <figure>
+            <img src="assets/gallery/crt-tv.webp" width="1200" height="800" loading="lazy" decoding="async" alt="CRT TV output with softened horizontal detail and scanline behavior" />
+            <figcaption><strong>CRT TV</strong><span>Soft luma · field texture</span></figcaption>
+          </figure>
+          <figure>
+            <img src="assets/gallery/security-cam.webp" width="1200" height="800" loading="lazy" decoding="async" alt="Security Camera output with heavy signal noise and reduced clarity" />
+            <figcaption><strong>Security Cam</strong><span>Noise floor · surveillance wear</span></figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="node-section" id="nodes" aria-labelledby="nodes-title">
+        <div class="section-heading compact">
+          <p class="eyebrow">Choose the right amount of control</p>
+          <h2 id="nodes-title">Start simple. Split the signal when needed.</h2>
+        </div>
+        <div class="node-grid">
+          <article class="node-card featured">
+            <p class="node-index">01</p>
+            <h3>Simple</h3>
+            <p>Pick a preset, set intensity and saturation, and keep moving.</p>
+          </article>
+          <article class="node-card">
+            <p class="node-index">02</p>
+            <h3>Intermediate</h3>
+            <p>Add scaling, field mode, and deterministic seed controls.</p>
+          </article>
+          <article class="node-card">
+            <p class="node-index">03</p>
+            <h3>Advanced</h3>
+            <p>Expose the full signal-processing surface in one node.</p>
+          </article>
+          <article class="node-card wide">
+            <p class="node-index">04—10</p>
+            <h3>Chainable families</h3>
+            <p>Signal · Scanlines · Artifacts · Noise · VHS · Global · Scale</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="pipeline" aria-labelledby="pipeline-title">
+        <div>
+          <p class="eyebrow">The working path</p>
+          <h2 id="pipeline-title">Tensor in. Analog damage. Tensor out.</h2>
+        </div>
+        <ol>
+          <li><span>01</span><strong>ComfyUI</strong><small>BHWC float tensor</small></li>
+          <li><span>02</span><strong>PyO3</strong><small>validated NumPy boundary</small></li>
+          <li><span>03</span><strong>ntsc-rs</strong><small>native YIQ signal work</small></li>
+          <li><span>04</span><strong>Output</strong><small>RGB tensor, same graph</small></li>
+        </ol>
+      </section>
+
+      <section class="install" id="install" aria-labelledby="install-title">
+        <div>
+          <p class="eyebrow">Python 3.12+ · Rust 1.89+</p>
+          <h2 id="install-title">Build for the Python that runs ComfyUI.</h2>
+          <p>The installer targets an explicit interpreter and never copies into a machine-specific folder unless you ask it to install.</p>
+        </div>
+        <pre><code>git clone https://github.com/gvastethecreator/comfyui-ntsc-rs.git
+cd comfyui-ntsc-rs
+python -m pip install -r requirements.txt
+python build_node.py --install</code></pre>
+      </section>
+    </main>
+
+    <footer>
+      <p><strong>ComfyUI NTSC-RS</strong> · Local image processing. No accounts. No telemetry.</p>
+      <div>
+        <a href="https://github.com/sponsors/gvastethecreator">Sponsor on GitHub</a>
+        <a href="https://ko-fi.com/gvaste">Support on Ko-fi</a>
+        <a href="https://github.com/gvastethecreator/comfyui-ntsc-rs/blob/main/LICENSE">License</a>
+      </div>
+    </footer>
+  </body>
+</html>

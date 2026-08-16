@@ -1,5 +1,5 @@
 [build-system]
-requires = ["maturin>=1.0"]
+requires = ["maturin>=1.14.1"]
 build-backend = "maturin"
 
 [project]
@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Native NTSC/VHS/CRT effect processing for ComfyUI"
 readme = "README.md"
 license = {text = "MIT OR ISC OR Apache-2.0"}
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 authors = [
     {name = "ComfyUI NTSC-RS Contributors"}
 ]
@@ -19,24 +19,32 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Rust",
     "Topic :: Multimedia :: Video",
 ]
 
 [project.urls]
-Homepage = "https://github.com/YOUR_USERNAME/comfyui-ntscrs"
-Repository = "https://github.com/YOUR_USERNAME/comfyui-ntscrs"
-Documentation = "https://github.com/YOUR_USERNAME/comfyui-ntscrs#readme"
+Homepage = "https://github.com/gvastethecreator/comfyui-ntsc-rs"
+Repository = "https://github.com/gvastethecreator/comfyui-ntsc-rs"
+Documentation = "https://github.com/gvastethecreator/comfyui-ntsc-rs#readme"
 
 [project.optional-dependencies]
 dev = [
-    "maturin>=1.0",
-    "torch",
-    "numpy",
+    "maturin>=1.14.1",
+    "torch>=2.13.0",
+    "numpy>=2.5.2",
+    "ruff>=0.16.3",
 ]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+ignore = ["E501"]
 
 [tool.maturin]
 features = ["pyo3/extension-module"]

@@ -2,7 +2,7 @@ use std::{f32::consts::FRAC_1_SQRT_2, ops::RangeInclusive};
 
 use core::f32::consts::PI;
 use fearless_simd::{Level, dispatch, prelude::*};
-use rand::{Rng, RngCore, SeedableRng};
+use rand::{Rng, RngExt, SeedableRng};
 use rand_xoshiro::Xoshiro256PlusPlus;
 
 use crate::{

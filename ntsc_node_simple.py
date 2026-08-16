@@ -4,16 +4,15 @@ This node provides quick access to common VHS/CRT looks using presets.
 For full control over all parameters, use NtscRsNode instead.
 """
 
-import torch
 import numpy as np
-from typing import Tuple
+import torch
 
 try:
     from comfy_api.latest import io
 except ImportError:
     from comfy import io
 
-from .ntsc_presets import PRESETS, get_preset, get_preset_names, apply_intensity_to_preset
+from .ntsc_presets import apply_intensity_to_preset, get_preset, get_preset_names
 
 
 class NtscRsSimpleNode(io.ComfyNode):
@@ -27,27 +26,37 @@ class NtscRsSimpleNode(io.ComfyNode):
             category="NTSC",
             description="VHS/CRT effect with preset configurations. For full parameter control, use the Advanced node.",
             inputs=[
-                io.Image.Input("image", display_name="Image", tooltip="Image to apply NTSC effect to"),
-                io.Combo.Input("preset", display_name="Preset",
+                io.Image.Input(
+                    "image", display_name="Image", tooltip="Image to apply NTSC effect to"
+                ),
+                io.Combo.Input(
+                    "preset",
+                    display_name="Preset",
                     options=get_preset_names(),
                     default="vhs_classic",
                     tooltip="Preset configuration",
                 ),
-                io.Float.Input("intensity", display_name="Intensity",
+                io.Float.Input(
+                    "intensity",
+                    display_name="Intensity",
                     default=1.0,
                     min=0.0,
                     max=1.0,
                     step=0.01,
                     tooltip="Effect intensity multiplier",
                 ),
-                io.Float.Input("saturation", display_name="Saturation",
+                io.Float.Input(
+                    "saturation",
+                    display_name="Saturation",
                     default=0.25,
                     min=-1.0,
                     max=2.0,
                     step=0.01,
                     tooltip="Color saturation adjustment",
                 ),
-                io.Int.Input("random_seed", display_name="Seed",
+                io.Int.Input(
+                    "random_seed",
+                    display_name="Seed",
                     default=0,
                     min=-2147483648,
                     max=2147483647,
@@ -75,6 +84,7 @@ class NtscRsSimpleNode(io.ComfyNode):
         """Process the image through the NTSC effect."""
         try:
             import comfyui_ntsc_rs
+
             HAS_RUST = True
         except ImportError:
             HAS_RUST = False
@@ -90,7 +100,9 @@ class NtscRsSimpleNode(io.ComfyNode):
 
         preset_config = get_preset(preset)
         preset_config["random_seed"] = random_seed
-        preset_config["composite_sharpening"] = preset_config.get("composite_sharpening", 1.0) * (1.0 + saturation)
+        preset_config["composite_sharpening"] = preset_config.get("composite_sharpening", 1.0) * (
+            1.0 + saturation
+        )
 
         for i in range(batch_size):
             img = image[i]

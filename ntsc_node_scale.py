@@ -8,9 +8,9 @@ processing (filter bandwidth), not image dimensions. This node performs actual
 image resizing using PyTorch interpolation.
 """
 
+import numpy as np
 import torch
 import torch.nn.functional as F
-import numpy as np
 
 try:
     from comfy_api.latest import io
@@ -19,12 +19,12 @@ except ImportError:
 
 
 SCALE_PRESET_OPTIONS = [
-    "Source (1x)", 
-    "Half (0.5x)", 
+    "Source (1x)",
+    "Half (0.5x)",
     "Quarter (0.25x)",
-    "Double (2x)", 
+    "Double (2x)",
     "Quad (4x)",
-    "Custom"
+    "Custom",
 ]
 
 
@@ -40,18 +40,37 @@ class NtscRsScaleNode(io.ComfyNode):
             description="Resolution scaling: horizontal and vertical scale factors. Performs actual image resizing using PyTorch. Chain after other NTSC category nodes.",
             inputs=[
                 io.Image.Input("image", display_name="Image", tooltip="Image to process"),
-
-                io.Combo.Input("scale_preset", display_name="Scale Preset",
+                io.Combo.Input(
+                    "scale_preset",
+                    display_name="Scale Preset",
                     options=SCALE_PRESET_OPTIONS,
                     default="Source (1x)",
                     tooltip="Output resolution preset",
                 ),
-                io.Float.Input("horizontal_scale", display_name="H Scale", default=1.0, min=0.125, max=8.0, step=0.125,
-                    tooltip="Horizontal scale factor"),
-                io.Float.Input("vertical_scale", display_name="V Scale", default=1.0, min=0.125, max=8.0, step=0.125,
-                    tooltip="Vertical scale factor"),
-                io.Boolean.Input("scale_with_video_size", display_name="Scale With Video Size", default=False,
-                    tooltip="Multiply scale by video height"),
+                io.Float.Input(
+                    "horizontal_scale",
+                    display_name="H Scale",
+                    default=1.0,
+                    min=0.125,
+                    max=8.0,
+                    step=0.125,
+                    tooltip="Horizontal scale factor",
+                ),
+                io.Float.Input(
+                    "vertical_scale",
+                    display_name="V Scale",
+                    default=1.0,
+                    min=0.125,
+                    max=8.0,
+                    step=0.125,
+                    tooltip="Vertical scale factor",
+                ),
+                io.Boolean.Input(
+                    "scale_with_video_size",
+                    display_name="Scale With Video Size",
+                    default=False,
+                    tooltip="Multiply scale by video height",
+                ),
             ],
             outputs=[
                 io.Image.Output(display_name="Image", tooltip="Rescaled image"),
@@ -89,6 +108,7 @@ class NtscRsScaleNode(io.ComfyNode):
         """Process the image through NTSC scaling (actual resize)."""
         try:
             import comfyui_ntsc_rs
+
             HAS_RUST = True
         except ImportError:
             HAS_RUST = False
@@ -132,24 +152,21 @@ class NtscRsScaleNode(io.ComfyNode):
         for i in range(batch_size):
             img = image[i]
             img_np = (img.cpu().numpy() * 255.0).astype(np.uint8)
-            
+
             result = comfyui_ntsc_rs.apply_ntsc_filter(img_np, params)
             result_float = torch.from_numpy(result).float() / 255.0
-            
+
             if h_scale != 1.0 or v_scale != 1.0:
                 new_height = int(height * v_scale)
                 new_width = int(width * h_scale)
-                
+
                 result_float = result_float.permute(2, 0, 1)
                 result_float = result_float.unsqueeze(0)
                 result_float = F.interpolate(
-                    result_float,
-                    size=(new_height, new_width),
-                    mode='bilinear',
-                    align_corners=False
+                    result_float, size=(new_height, new_width), mode="bilinear", align_corners=False
                 )
                 result_float = result_float.squeeze(0).permute(1, 2, 0)
-            
+
             result_float = torch.clamp(result_float, 0.0, 1.0)
             results.append(result_float)
 
@@ -157,5 +174,9 @@ class NtscRsScaleNode(io.ComfyNode):
         return io.NodeOutput(output)
 
     @classmethod
-    async def execute(cls, image, scale_preset, horizontal_scale, vertical_scale, scale_with_video_size):
-        return cls.process(image, scale_preset, horizontal_scale, vertical_scale, scale_with_video_size)
+    async def execute(
+        cls, image, scale_preset, horizontal_scale, vertical_scale, scale_with_video_size
+    ):
+        return cls.process(
+            image, scale_preset, horizontal_scale, vertical_scale, scale_with_video_size
+        )

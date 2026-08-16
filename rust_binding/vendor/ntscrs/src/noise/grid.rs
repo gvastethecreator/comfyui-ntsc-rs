@@ -48,8 +48,8 @@ impl Grid<2> for Simplex {
         let jps = (y + s).floor();
 
         // Integer coordinates for the base vertex of the triangle
-        let i = ips.to_int();
-        let j = jps.to_int();
+        let i: S::i32s = ips.to_int();
+        let j: S::i32s = jps.to_int();
 
         let t = S::f32s::float_from(i + j) * unskew;
 
@@ -57,8 +57,10 @@ impl Grid<2> for Simplex {
         let x0: S::f32s = x - (ips - t);
         let y0: S::f32s = y - (jps - t);
 
-        let i1 = x0.simd_ge(y0).bitcast::<S::i32s>();
-        let j1 = y0.simd_gt(x0).bitcast::<S::i32s>();
+        let zero = S::i32s::splat(i.witness(), 0);
+        let negative_one = S::i32s::splat(i.witness(), -1);
+        let i1 = x0.simd_ge(y0).select(negative_one, zero);
+        let j1 = y0.simd_gt(x0).select(negative_one, zero);
 
         // Distances to the second and third points of the enclosing simplex
         let x1 = x0 + S::f32s::float_from(i1) + unskew;

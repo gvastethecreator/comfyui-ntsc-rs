@@ -4,8 +4,8 @@ Applies signal processing effects: filter type, luma/chroma filters, smear, shar
 Part of the chainable NTSC-RS node system.
 """
 
-import torch
 import numpy as np
+import torch
 
 try:
     from comfy_api.latest import io
@@ -31,38 +31,65 @@ class NtscRsSignalNode(io.ComfyNode):
             description="Signal processing: filter type, luma/chroma filters, smear, and sharpening. Chain after other NTSC category nodes.",
             inputs=[
                 io.Image.Input("image", display_name="Image", tooltip="Image to process"),
-
-                io.Combo.Input("filter_type", display_name="Filter Type",
+                io.Combo.Input(
+                    "filter_type",
+                    display_name="Filter Type",
                     options=FILTER_TYPE_OPTIONS,
                     default="Butterworth",
                     tooltip="NTSC decode filter type",
                 ),
-                io.Combo.Input("input_luma_filter", display_name="Luma Filter",
+                io.Combo.Input(
+                    "input_luma_filter",
+                    display_name="Luma Filter",
                     options=LUMA_LOWPASS_OPTIONS,
                     default="Notch",
                     tooltip="Input luminance low-pass filter",
                 ),
-                io.Combo.Input("chroma_lowpass_in", display_name="Chroma Lowpass In",
+                io.Combo.Input(
+                    "chroma_lowpass_in",
+                    display_name="Chroma Lowpass In",
                     options=CHROMA_LOWPASS_OPTIONS,
                     default="Full",
                     tooltip="Input chroma low-pass filter",
                 ),
-                io.Combo.Input("chroma_demodulation", display_name="Chroma Demodulation",
+                io.Combo.Input(
+                    "chroma_demodulation",
+                    display_name="Chroma Demodulation",
                     options=CHROMA_DEMOD_OPTIONS,
                     default="Notch",
                     tooltip="Chroma demodulation filter",
                 ),
-                io.Combo.Input("chroma_lowpass_out", display_name="Chroma Lowpass Out",
+                io.Combo.Input(
+                    "chroma_lowpass_out",
+                    display_name="Chroma Lowpass Out",
                     options=CHROMA_LOWPASS_OPTIONS,
                     default="Full",
                     tooltip="Output chroma low-pass filter",
                 ),
-                io.Float.Input("luma_smear", display_name="Luma Smear", default=0.5, min=0.0, max=1.0, step=0.01,
-                    tooltip="Luminance smear amount"),
-                io.Float.Input("composite_sharpening", display_name="Sharpening", default=1.0, min=-1.0, max=2.0, step=0.01,
-                    tooltip="Composite sharpening/preemphasis"),
-                io.Boolean.Input("chroma_vert_blend", display_name="Chroma Vert Blend", default=True,
-                    tooltip="Vertically blend chroma between scanlines"),
+                io.Float.Input(
+                    "luma_smear",
+                    display_name="Luma Smear",
+                    default=0.5,
+                    min=0.0,
+                    max=1.0,
+                    step=0.01,
+                    tooltip="Luminance smear amount",
+                ),
+                io.Float.Input(
+                    "composite_sharpening",
+                    display_name="Sharpening",
+                    default=1.0,
+                    min=-1.0,
+                    max=2.0,
+                    step=0.01,
+                    tooltip="Composite sharpening/preemphasis",
+                ),
+                io.Boolean.Input(
+                    "chroma_vert_blend",
+                    display_name="Chroma Vert Blend",
+                    default=True,
+                    tooltip="Vertically blend chroma between scanlines",
+                ),
             ],
             outputs=[
                 io.Image.Output(display_name="Image", tooltip="Processed image"),
@@ -80,11 +107,22 @@ class NtscRsSignalNode(io.ComfyNode):
         )
 
     @classmethod
-    def process(cls, image, filter_type, input_luma_filter, chroma_lowpass_in, chroma_demodulation,
-                chroma_lowpass_out, luma_smear, composite_sharpening, chroma_vert_blend):
+    def process(
+        cls,
+        image,
+        filter_type,
+        input_luma_filter,
+        chroma_lowpass_in,
+        chroma_demodulation,
+        chroma_lowpass_out,
+        luma_smear,
+        composite_sharpening,
+        chroma_vert_blend,
+    ):
         """Process the image through NTSC signal effects."""
         try:
             import comfyui_ntsc_rs
+
             HAS_RUST = True
         except ImportError:
             HAS_RUST = False
@@ -137,7 +175,26 @@ class NtscRsSignalNode(io.ComfyNode):
         return io.NodeOutput(output)
 
     @classmethod
-    async def execute(cls, image, filter_type, input_luma_filter, chroma_lowpass_in, chroma_demodulation,
-                     chroma_lowpass_out, luma_smear, composite_sharpening, chroma_vert_blend):
-        return cls.process(image, filter_type, input_luma_filter, chroma_lowpass_in, chroma_demodulation,
-                          chroma_lowpass_out, luma_smear, composite_sharpening, chroma_vert_blend)
+    async def execute(
+        cls,
+        image,
+        filter_type,
+        input_luma_filter,
+        chroma_lowpass_in,
+        chroma_demodulation,
+        chroma_lowpass_out,
+        luma_smear,
+        composite_sharpening,
+        chroma_vert_blend,
+    ):
+        return cls.process(
+            image,
+            filter_type,
+            input_luma_filter,
+            chroma_lowpass_in,
+            chroma_demodulation,
+            chroma_lowpass_out,
+            luma_smear,
+            composite_sharpening,
+            chroma_vert_blend,
+        )

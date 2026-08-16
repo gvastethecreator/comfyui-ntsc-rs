@@ -1,221 +1,151 @@
 #!/usr/bin/env python3
-"""Build script for the comfyui-ntsc-rs Rust binding."""
+"""Build the comfyui-ntsc-rs native extension without mutating ComfyUI."""
 
+from __future__ import annotations
+
+import argparse
+import shutil
 import subprocess
 import sys
-import os
-import shutil
 from pathlib import Path
 
-def safe_print(text):
-    """Print text safely handling encoding issues."""
-    if text is None:
-        return
+ROOT = Path(__file__).resolve().parent
+RUST_BINDING = ROOT / "rust_binding"
+WHEEL_DIRECTORY = RUST_BINDING / "target" / "wheels"
+MINIMUM_MATURIN = (1, 14, 1)
+LOCAL_PYTHONS = (
+    ROOT / ".venv" / "Scripts" / "python.exe",
+    ROOT / "venv" / "Scripts" / "python.exe",
+)
+
+
+def run(command: list[str], *, cwd: Path = ROOT) -> subprocess.CompletedProcess[str]:
+    """Run a command directly and keep its output visible."""
+    return subprocess.run(command, cwd=cwd, text=True, check=False)
+
+
+def resolve_python(explicit: str | None) -> str:
+    """Resolve an explicit interpreter, a project venv, or this Python."""
+    if explicit:
+        candidate = Path(explicit).expanduser()
+        resolved = str(candidate.resolve()) if candidate.exists() else shutil.which(explicit)
+        if resolved:
+            return resolved
+        raise SystemExit(f"Python interpreter not found: {explicit}")
+
+    for candidate in LOCAL_PYTHONS:
+        if candidate.is_file():
+            return str(candidate)
+
+    return sys.executable
+
+
+def resolve_maturin(python: str) -> str | None:
+    """Find maturin beside the selected interpreter or on PATH."""
+    scripts = Path(python).resolve().parent
+    for name in ("maturin.exe", "maturin"):
+        candidate = scripts / name
+        if candidate.is_file():
+            return str(candidate)
+    return shutil.which("maturin")
+
+
+def maturin_version(executable: str) -> tuple[int, ...] | None:
+    """Read the selected maturin executable's version."""
+    result = subprocess.run([executable, "--version"], capture_output=True, text=True, check=False)
+    if result.returncode != 0:
+        return None
     try:
-        print(text)
-    except (UnicodeEncodeError, UnicodeDecodeError):
-        try:
-            sys.stdout.buffer.write(text.encode('utf-8', errors='replace'))
-            sys.stdout.buffer.write(b'\n')
-        except Exception:
-            print(str(text, errors='replace'))
-
-SCRIPT_DIR = Path(__file__).parent.resolve()
-RUST_BINDING_DIR = SCRIPT_DIR / "rust_binding"
-
-COMFYUI_POSSIBLE_LOCATIONS = [
-    SCRIPT_DIR / "venv" / "Scripts" / "python.exe",
-    SCRIPT_DIR.parent / "venv" / "Scripts" / "python.exe",
-    SCRIPT_DIR.parent.parent / "venv" / "Scripts" / "python.exe",
-    Path("A:/ComfyUI/venv/Scripts/python.exe"),
-    Path("A:/StabilityMatrix/Data/Packages/ComfyUI/venv/Scripts/python.exe"),
-    Path("C:/ComfyUI/venv/Scripts/python.exe"),
-]
+        version = result.stdout.strip().removeprefix("maturin ")
+        return tuple(int(part) for part in version.split(".")[:3])
+    except ValueError:
+        return None
 
 
-def check_rust():
-    """Check if Rust/Cargo is installed."""
+def require_tooling(python: str) -> str:
+    """Fail with an actionable command when required build tools are absent."""
     if shutil.which("cargo") is None:
-        print("Error: Rust/Cargo not found. Install from https://rustup.rs/")
-        return False
-    return True
+        raise SystemExit("Rust/Cargo not found. Install it from https://rustup.rs/.")
 
-
-def get_torch_info(python: str) -> dict:
-    """Get PyTorch and CUDA info from the target Python."""
-    try:
-        result = subprocess.run(
-            [python, "-c", "import torch; print(torch.__version__); print(torch.version.cuda if torch.cuda.is_available() else 'CPU')"],
-            capture_output=True,
-            text=True,
-            encoding='utf-8',
-            errors='replace'
+    executable = resolve_maturin(python)
+    installed = maturin_version(executable) if executable else None
+    if installed is None or installed < MINIMUM_MATURIN:
+        required = ".".join(map(str, MINIMUM_MATURIN))
+        raise SystemExit(
+            f"maturin>={required} is required for {python}. "
+            f'Install it with: "{python}" -m pip install -r "{ROOT / "requirements.txt"}"'
         )
-        if result.returncode == 0:
-            lines = result.stdout.strip().split('\n')
-            return {
-                "torch_version": lines[0] if len(lines) > 0 else "unknown",
-                "cuda_version": lines[1] if len(lines) > 1 else "CPU"
-            }
-    except Exception:
-        pass
-    return {"torch_version": "unknown", "cuda_version": "CPU"}
+    return executable
 
 
-def get_build_python():
-    """Find the Python interpreter from ComfyUI venv."""
-    for comfyui_python in COMFYUI_POSSIBLE_LOCATIONS:
-        if comfyui_python.exists():
-            print(f"Found ComfyUI Python: {comfyui_python}")
-            torch_info = get_torch_info(str(comfyui_python))
-            print(f"  PyTorch: {torch_info['torch_version']}")
-            print(f"  CUDA: {torch_info['cuda_version']}")
-            return str(comfyui_python)
+def build(python: str, *, release: bool, install: bool) -> Path:
+    """Build one wheel and optionally install that exact artifact."""
+    maturin = require_tooling(python)
+    WHEEL_DIRECTORY.mkdir(parents=True, exist_ok=True)
+    previous = {path.resolve() for path in WHEEL_DIRECTORY.glob("*.whl")}
 
-    for python in [sys.executable, "python", "python3", "py"]:
-        try:
-            result = subprocess.run(
-                [python, "-c", "import torch; print(torch.__version__)"],
-                capture_output=True,
-                text=True,
-                encoding='utf-8',
-                errors='replace'
-            )
-            if result.returncode == 0:
-                print(f"Using system Python: {python} ({result.stdout.strip()})")
-                return python
-        except Exception:
-            pass
+    command = [
+        maturin,
+        "build",
+        "--locked",
+        "--interpreter",
+        python,
+        "--out",
+        str(WHEEL_DIRECTORY),
+    ]
+    if release:
+        command.append("--release")
 
-    print("Error: Could not find ComfyUI Python")
-    return None
-
-
-def build():
-    """Build the Rust binding using maturin."""
-    if not check_rust():
-        sys.exit(1)
-
-    python = get_build_python()
-    if python is None:
-        sys.exit(1)
-
-    print(f"Installing maturin and setuptools-rust in target environment...")
-    result = subprocess.run(
-        [python, "-m", "pip", "install", "maturin", "setuptools-rust"],
-        capture_output=True,
-        text=True,
-        encoding='utf-8',
-        errors='replace'
-    )
+    profile = "release" if release else "development"
+    print(f"Building {profile} wheel with {python}", flush=True)
+    result = run(command, cwd=RUST_BINDING)
     if result.returncode != 0:
-        print(f"Failed to install dependencies:")
-        safe_print(result.stderr)
-        sys.exit(1)
+        raise SystemExit(result.returncode)
 
-    print(f"Building comfyui_ntsc_rs wheel...")
-    result = subprocess.run(
-        [python, "-m", "maturin", "build", "--release", "--interpreter", python],
-        cwd=RUST_BINDING_DIR,
-        capture_output=True,
-        text=True,
-        encoding='utf-8',
-        errors='replace'
+    candidates = sorted(
+        WHEEL_DIRECTORY.glob("*.whl"),
+        key=lambda path: path.stat().st_mtime_ns,
+        reverse=True,
     )
+    if not candidates:
+        raise SystemExit(f"Build succeeded but no wheel was found in {WHEEL_DIRECTORY}.")
 
-    if result.returncode != 0:
-        print(f"Build failed:")
-        safe_print(result.stderr)
-        sys.exit(1)
+    wheel = candidates[0]
+    if wheel.resolve() in previous:
+        print(f"Updated wheel: {wheel}", flush=True)
+    else:
+        print(f"Created wheel: {wheel}", flush=True)
 
-    wheel_path = RUST_BINDING_DIR / "target" / "release" / "wheels"
-    if wheel_path.exists():
-        for whl in wheel_path.glob("*.whl"):
-            print(f"Installing wheel: {whl.name}")
-            install_result = subprocess.run(
-                [python, "-m", "pip", "install", "--force-reinstall", str(whl)],
-                capture_output=True,
-                text=True,
-                encoding='utf-8',
-                errors='replace'
-            )
-            if install_result.returncode == 0:
-                print("Wheel installed successfully!")
-            else:
-                print(f"Failed to install wheel:")
-                print(install_result.stderr)
-                sys.exit(1)
+    if install:
+        result = run([python, "-m", "pip", "install", "--force-reinstall", "--no-deps", str(wheel)])
+        if result.returncode != 0:
+            raise SystemExit(result.returncode)
+        print(f"Installed {wheel.name} into {python}", flush=True)
 
-    print("Build successful!")
-    return True
+    return wheel
 
 
-def develop():
-    """Build in development mode for faster iteration."""
-    if not check_rust():
-        sys.exit(1)
-
-    python = get_build_python()
-    if python is None:
-        sys.exit(1)
-
-    print(f"Installing maturin and setuptools-rust...")
-    result = subprocess.run(
-        [python, "-m", "pip", "install", "maturin", "setuptools-rust"],
-        capture_output=True,
-        text=True,
-        encoding='utf-8',
-        errors='replace'
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--dev", action="store_true", help="Build an unoptimized wheel.")
+    parser.add_argument("--install", action="store_true", help="Install the wheel after building.")
+    parser.add_argument("--python", help="Target Python executable or command.")
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Run Cargo check instead of building a wheel.",
     )
-    if result.returncode != 0:
-        print(f"Failed to install dependencies:")
-        safe_print(result.stderr)
-        sys.exit(1)
+    args = parser.parse_args()
 
-    print(f"Building comfyui_ntsc_rs wheel (dev mode)...")
-    result = subprocess.run(
-        [python, "-m", "maturin", "build", "--interpreter", python],
-        cwd=RUST_BINDING_DIR,
-        capture_output=True,
-        text=True,
-        encoding='utf-8',
-        errors='replace'
-    )
+    python = resolve_python(args.python)
 
-    if result.returncode != 0:
-        print(f"Build failed:")
-        safe_print(result.stderr)
-        sys.exit(1)
+    if args.check:
+        require_tooling(python)
+        return run(["cargo", "check", "--locked"], cwd=RUST_BINDING).returncode
 
-    wheel_path = RUST_BINDING_DIR / "target" / "release" / "wheels"
-    if wheel_path.exists():
-        for whl in wheel_path.glob("*.whl"):
-            print(f"Installing wheel: {whl.name}")
-            install_result = subprocess.run(
-                [python, "-m", "pip", "install", "--force-reinstall", str(whl)],
-                capture_output=True,
-                text=True,
-                encoding='utf-8',
-                errors='replace'
-            )
-            if install_result.returncode == 0:
-                print("Wheel installed successfully!")
-            else:
-                print(f"Failed to install wheel:")
-                print(install_result.stderr)
-                sys.exit(1)
-
-    print("Build successful!")
-    return True
+    build(python, release=not args.dev, install=args.install)
+    return 0
 
 
 if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser(description="Build comfyui-ntsc-rs Rust binding")
-    parser.add_argument("--dev", action="store_true", help="Build in development mode")
-    args = parser.parse_args()
-
-    if args.dev:
-        develop()
-    else:
-        build()
+    raise SystemExit(main())

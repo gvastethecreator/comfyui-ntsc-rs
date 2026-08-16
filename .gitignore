@@ -2,13 +2,18 @@
 __pycache__/
 *.py[cod]
 *$py.class
+.scratch/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
 # Distribution / packaging
 .Python
 build/
 dist/
-internal/
 *.egg-info/
+.coverage
+htmlcov/
 
 # Rust build artifacts
 rust_binding/target/
@@ -17,11 +22,12 @@ rust_binding/target/
 *.dll
 *.dylib
 
-# Wheels (keep only source wheels in repo)
-# wheels/*.whl is tracked but binary wheels should be built by CI
+# Local wheels are platform-specific build output
+wheels/
 
-# IDE
-.vscode/
+# IDE (share common tasks, keep personal settings local)
+.vscode/*
+!.vscode/tasks.json
 .idea/
 *.swp
 *.swo
@@ -40,6 +46,7 @@ env/
 
 # Test outputs
 test_outputs/
+test-results/
 
 # Logs
 *.log

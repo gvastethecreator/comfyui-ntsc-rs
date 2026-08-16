@@ -1,170 +1,151 @@
 {
-  "generated_at": "2026-08-08T09:49:51Z",
-  "generated_from_commit": "3b0623af68dfde1c58ad16a6445abd7098c7ab05",
+  "generated_at": "2026-08-15T03:33:15Z",
+  "generated_from_commit": "728a067b8d58e862e7a0ebef6c960e4eafa5bcca",
   "scope": [
     "."
   ],
   "nodes": [
     {
-      "id": "external-dependencies",
+      "id": "comfy-extension",
       "path": "__init__.py",
-      "role": "Represents external packages referenced by tracked source files.",
+      "role": "Registers ten nodes through the current ComfyUI API and legacy mappings.",
+      "type": "interface",
+      "boundary": "ComfyUI",
+      "entrypoints": ["__init__.py:comfy_entrypoint", "__init__.py:NODE_CLASS_MAPPINGS"],
+      "tests": [],
+      "constraints": ["Preserve all ten public node identifiers."],
+      "evidence": {"status": "verified", "locations": [{"path": "__init__.py", "symbol": "NtscRsExtension"}]}
+    },
+    {
+      "id": "full-nodes",
+      "path": "ntsc_node.py",
+      "role": "Provides Advanced, Simple, and Intermediate ComfyUI workflows.",
+      "type": "module",
+      "boundary": "Python UI",
+      "entrypoints": ["ntsc_node.py:NtscRsNode", "ntsc_node_simple.py:NtscRsSimpleNode", "ntsc_node_intermediate.py:NtscRsIntermediateNode"],
+      "tests": [],
+      "constraints": ["ComfyUI images enter and leave as float tensors."],
+      "evidence": {"status": "verified", "locations": [{"path": "ntsc_node.py", "symbol": "NtscRsNode"}]}
+    },
+    {
+      "id": "chainable-nodes",
+      "path": "ntsc_node_signal.py",
+      "role": "Provides seven focused effect-family nodes for composable workflows.",
+      "type": "module",
+      "boundary": "Python UI",
+      "entrypoints": ["ntsc_node_signal.py:NtscRsSignalNode", "ntsc_node_vhs.py:NtscRsVHSNode", "ntsc_node_scale.py:NtscRsScaleNode"],
+      "tests": [],
+      "constraints": ["Each node exposes one effect family and returns one image."],
+      "evidence": {"status": "verified", "locations": [{"path": "ntsc_node_signal.py", "symbol": "NtscRsSignalNode"}]}
+    },
+    {
+      "id": "presets",
+      "path": "ntsc_presets.py",
+      "role": "Owns fourteen named VHS, CRT, console, camera, and film presets.",
+      "type": "module",
+      "boundary": "Python UI",
+      "entrypoints": ["ntsc_presets.py:PRESETS"],
+      "tests": [],
+      "constraints": ["Preset keys remain stable for saved workflows."],
+      "evidence": {"status": "verified", "locations": [{"path": "ntsc_presets.py", "symbol": "get_preset_display_name"}]}
+    },
+    {
+      "id": "native-binding",
+      "path": "rust_binding/src/lib.rs",
+      "role": "Validates NumPy frames, translates settings, and owns the PyO3 result array.",
+      "type": "interface",
+      "boundary": "PyO3",
+      "entrypoints": ["rust_binding/src/lib.rs:apply_ntsc_filter"],
+      "tests": ["scripts/native_smoke.py"],
+      "constraints": ["Reject zero-channel input; return H x W x 3 uint8 output."],
+      "evidence": {"status": "verified", "locations": [{"path": "rust_binding/src/lib.rs", "symbol": "apply_ntsc_filter"}]}
+    },
+    {
+      "id": "signal-engine",
+      "path": "rust_binding/vendor/ntscrs/src/ntsc.rs",
+      "role": "Applies the vendored NTSC, VHS, noise, scaling, and YIQ algorithms.",
+      "type": "service",
+      "boundary": "Rust",
+      "entrypoints": ["rust_binding/vendor/ntscrs/src/ntsc.rs:NtscEffect"],
+      "tests": [],
+      "constraints": ["Keep local migrations behavior-compatible with the vendored engine."],
+      "evidence": {"status": "verified", "locations": [{"path": "rust_binding/vendor/ntscrs/src/ntsc.rs", "symbol": "NtscEffect"}]}
+    },
+    {
+      "id": "build-tooling",
+      "path": "build_node.py",
+      "role": "Builds a locked native wheel for an explicit or project-local Python interpreter.",
+      "type": "module",
+      "boundary": "Developer tooling",
+      "entrypoints": ["build_node.py:main"],
+      "tests": [],
+      "constraints": ["Never copy to external folders; install only with --install."],
+      "evidence": {"status": "verified", "locations": [{"path": "build_node.py", "symbol": "build"}]}
+    },
+    {
+      "id": "quality-tooling",
+      "path": "scripts/verify.py",
+      "role": "Runs Python and Rust formatting, compile, test, and strict lint gates.",
+      "type": "module",
+      "boundary": "Developer tooling",
+      "entrypoints": ["scripts/verify.py:main"],
+      "tests": [],
+      "constraints": ["Verification must not install packages or mutate external environments."],
+      "evidence": {"status": "verified", "locations": [{"path": "scripts/verify.py", "symbol": "main"}]}
+    },
+    {
+      "id": "native-smoke",
+      "path": "scripts/native_smoke.py",
+      "role": "Exercises the installed extension with contiguous, strided, one-channel, and invalid NumPy inputs.",
+      "type": "module",
+      "boundary": "Integration verification",
+      "entrypoints": ["scripts/native_smoke.py:main"],
+      "tests": [],
+      "constraints": ["Run only after installing a wheel for the active Python interpreter."],
+      "evidence": {"status": "verified", "locations": [{"path": "scripts/native_smoke.py", "symbol": "main"}]}
+    },
+    {
+      "id": "project-site",
+      "path": "docs/index.html",
+      "role": "Presents the English project overview, real native output gallery, architecture, and install path on GitHub Pages.",
+      "type": "interface",
+      "boundary": "GitHub Pages",
+      "entrypoints": ["docs/index.html"],
+      "tests": [],
+      "constraints": ["Keep the site dependency-free, English-only, and functional under the repository subpath."],
+      "evidence": {"status": "verified", "locations": [{"path": "docs/index.html", "symbol": "main"}]}
+    },
+    {
+      "id": "external-dependencies",
+      "path": "pyproject.toml",
+      "role": "Represents ComfyUI, Torch, NumPy, PyO3, Maturin, and crates.io dependencies.",
       "type": "external",
       "boundary": "External",
-      "entrypoints": [
-        "__init__.py:comfy_api.latest"
-      ],
+      "entrypoints": ["pyproject.toml:project.optional-dependencies", "rust_binding/Cargo.toml:dependencies"],
       "tests": [],
-      "constraints": [
-        "Only dependencies with literal tracked-source references appear here."
-      ],
-      "evidence": {
-        "status": "verified",
-        "locations": [
-          {
-            "path": "__init__.py",
-            "symbol": "comfy_api.latest"
-          }
-        ]
-      }
-    },
-    {
-      "id": "repository",
-      "path": "__init__.py",
-      "role": "Owns the tracked files for the repository module.",
-      "type": "module",
-      "boundary": "Repository",
-      "entrypoints": [
-        "__init__.py:NtscRsExtension"
-      ],
-      "tests": [],
-      "constraints": [
-        "This baseline uses tracked source and explicit dependency references only."
-      ],
-      "evidence": {
-        "status": "verified",
-        "locations": [
-          {
-            "path": "__init__.py",
-            "symbol": "NtscRsExtension"
-          }
-        ]
-      }
-    },
-    {
-      "id": "rust-binding",
-      "path": "rust_binding",
-      "role": "Owns the tracked files for the rust_binding module.",
-      "type": "module",
-      "boundary": "Rust_Binding",
-      "entrypoints": [
-        "rust_binding/src/lib.rs:parse_use_field"
-      ],
-      "tests": [],
-      "constraints": [
-        "This baseline uses tracked source and explicit dependency references only."
-      ],
-      "evidence": {
-        "status": "verified",
-        "locations": [
-          {
-            "path": "rust_binding/src/lib.rs",
-            "symbol": "parse_use_field"
-          }
-        ]
-      }
+      "constraints": ["Direct versions and migration notes stay documented."],
+      "evidence": {"status": "verified", "locations": [{"path": "docs/DEPENDENCIES.md", "symbol": "Dependencies"}]}
     }
   ],
   "edges": [
-    {
-      "from": "repository",
-      "to": "external-dependencies",
-      "type": "imports",
-      "evidence": {
-        "status": "verified",
-        "locations": [
-          {
-            "path": "__init__.py",
-            "symbol": "comfy_api.latest"
-          },
-          {
-            "path": "build_node.py",
-            "symbol": "pathlib"
-          },
-          {
-            "path": "build_node.py",
-            "symbol": "subprocess"
-          },
-          {
-            "path": "build_node.py",
-            "symbol": "sys"
-          },
-          {
-            "path": "build_node.py",
-            "symbol": "os"
-          },
-          {
-            "path": "build_node.py",
-            "symbol": "shutil"
-          },
-          {
-            "path": "build_node.py",
-            "symbol": "argparse"
-          },
-          {
-            "path": "ntsc_node.py",
-            "symbol": "typing"
-          }
-        ]
-      }
-    },
-    {
-      "from": "rust-binding",
-      "to": "external-dependencies",
-      "type": "imports",
-      "evidence": {
-        "status": "verified",
-        "locations": [
-          {
-            "path": "rust_binding/src/lib.rs",
-            "symbol": "numpy"
-          },
-          {
-            "path": "rust_binding/src/lib.rs",
-            "symbol": "pyo3"
-          },
-          {
-            "path": "rust_binding/src/lib.rs",
-            "symbol": "ntsc_rs"
-          }
-        ]
-      }
-    }
+    {"from": "comfy-extension", "to": "full-nodes", "type": "imports", "evidence": {"status": "verified", "locations": [{"path": "__init__.py", "symbol": "NODE_CLASSES"}]}},
+    {"from": "comfy-extension", "to": "chainable-nodes", "type": "imports", "evidence": {"status": "verified", "locations": [{"path": "__init__.py", "symbol": "NODE_CLASSES"}]}},
+    {"from": "full-nodes", "to": "presets", "type": "reads", "evidence": {"status": "verified", "locations": [{"path": "ntsc_node_simple.py", "symbol": "get_preset"}]}},
+    {"from": "full-nodes", "to": "native-binding", "type": "calls", "evidence": {"status": "verified", "locations": [{"path": "ntsc_node.py", "symbol": "apply_ntsc_filter"}]}},
+    {"from": "chainable-nodes", "to": "native-binding", "type": "calls", "evidence": {"status": "verified", "locations": [{"path": "ntsc_node_signal.py", "symbol": "apply_ntsc_filter"}]}},
+    {"from": "native-binding", "to": "signal-engine", "type": "calls", "evidence": {"status": "verified", "locations": [{"path": "rust_binding/src/lib.rs", "symbol": "NtscEffect"}]}},
+    {"from": "build-tooling", "to": "native-binding", "type": "writes", "evidence": {"status": "verified", "locations": [{"path": "build_node.py", "symbol": "RUST_BINDING"}]}},
+    {"from": "quality-tooling", "to": "native-binding", "type": "reads", "evidence": {"status": "verified", "locations": [{"path": "scripts/verify.py", "symbol": "RUST"}]}},
+    {"from": "native-smoke", "to": "native-binding", "type": "calls", "evidence": {"status": "verified", "locations": [{"path": "scripts/native_smoke.py", "symbol": "apply_ntsc_filter"}]}},
+    {"from": "project-site", "to": "native-binding", "type": "reads", "evidence": {"status": "verified", "locations": [{"path": "docs/assets/gallery/README.md", "symbol": "Gallery provenance"}]}},
+    {"from": "full-nodes", "to": "external-dependencies", "type": "imports", "evidence": {"status": "verified", "locations": [{"path": "ntsc_node.py", "symbol": "torch"}]}},
+    {"from": "native-binding", "to": "external-dependencies", "type": "imports", "evidence": {"status": "verified", "locations": [{"path": "rust_binding/src/lib.rs", "symbol": "pyo3"}]}}
   ],
   "flows": [
-    {
-      "trigger": "Tracked reference __init__.py:comfy_api.latest",
-      "steps": [
-        "repository",
-        "external-dependencies"
-      ],
-      "outcome": "The verified dependency path reaches external-dependencies through 1 step(s)."
-    },
-    {
-      "trigger": "Tracked reference rust_binding/src/lib.rs:numpy",
-      "steps": [
-        "rust-binding",
-        "external-dependencies"
-      ],
-      "outcome": "The verified dependency path reaches external-dependencies through 1 step(s)."
-    },
-    {
-      "trigger": "Tracked reference build_node.py:pathlib",
-      "steps": [
-        "repository",
-        "external-dependencies"
-      ],
-      "outcome": "The verified dependency reaches external-dependencies."
-    }
+    {"trigger": "ComfyUI imports the full custom nodes", "steps": ["comfy-extension", "full-nodes"], "outcome": "Three full nodes are registered."},
+    {"trigger": "ComfyUI imports the chainable custom nodes", "steps": ["comfy-extension", "chainable-nodes"], "outcome": "Seven chainable nodes are registered."},
+    {"trigger": "A workflow executes an NTSC-RS node", "steps": ["full-nodes", "native-binding", "signal-engine"], "outcome": "One validated RGB frame is processed and returned."},
+    {"trigger": "A developer builds a wheel", "steps": ["build-tooling", "native-binding", "signal-engine"], "outcome": "A locked wheel for the selected interpreter is written under rust_binding/target/wheels."},
+    {"trigger": "CI installs a development wheel", "steps": ["native-smoke", "native-binding", "signal-engine"], "outcome": "The public NumPy boundary is checked for valid and invalid frame layouts."}
   ]
 }

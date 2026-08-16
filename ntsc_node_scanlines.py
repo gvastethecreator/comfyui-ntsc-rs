@@ -4,8 +4,8 @@ Applies field/scanline processing: field mode, scanline phase shift.
 Part of the chainable NTSC-RS node system.
 """
 
-import torch
 import numpy as np
+import torch
 
 try:
     from comfy_api.latest import io
@@ -13,7 +13,14 @@ except ImportError:
     from comfy import io
 
 
-USE_FIELD_OPTIONS = ["Alternating", "Upper", "Lower", "Both", "InterleavedUpper", "InterleavedLower"]
+USE_FIELD_OPTIONS = [
+    "Alternating",
+    "Upper",
+    "Lower",
+    "Both",
+    "InterleavedUpper",
+    "InterleavedLower",
+]
 PHASE_SHIFT_OPTIONS = ["Degrees0", "Degrees90", "Degrees180", "Degrees270"]
 
 
@@ -29,19 +36,29 @@ class NtscRsScanlinesNode(io.ComfyNode):
             description="Field and scanline processing: field mode and scanline phase shift. Chain after other NTSC category nodes.",
             inputs=[
                 io.Image.Input("image", display_name="Image", tooltip="Image to process"),
-
-                io.Combo.Input("use_field", display_name="Use Field",
+                io.Combo.Input(
+                    "use_field",
+                    display_name="Use Field",
                     options=USE_FIELD_OPTIONS,
                     default="InterleavedUpper",
                     tooltip="Field usage mode",
                 ),
-                io.Combo.Input("video_scanline_phase_shift", display_name="Video Scanline Phase Shift",
+                io.Combo.Input(
+                    "video_scanline_phase_shift",
+                    display_name="Video Scanline Phase Shift",
                     options=PHASE_SHIFT_OPTIONS,
                     default="Degrees180",
                     tooltip="Video scanline phase shift",
                 ),
-                io.Int.Input("video_scanline_phase_shift_offset", display_name="Phase Shift Offset", default=0, min=0, max=3, step=1,
-                    tooltip="Phase shift offset"),
+                io.Int.Input(
+                    "video_scanline_phase_shift_offset",
+                    display_name="Phase Shift Offset",
+                    default=0,
+                    min=0,
+                    max=3,
+                    step=1,
+                    tooltip="Phase shift offset",
+                ),
             ],
             outputs=[
                 io.Image.Output(tooltip="Processed image"),
@@ -59,10 +76,13 @@ class NtscRsScanlinesNode(io.ComfyNode):
         )
 
     @classmethod
-    def process(cls, image, use_field, video_scanline_phase_shift, video_scanline_phase_shift_offset):
+    def process(
+        cls, image, use_field, video_scanline_phase_shift, video_scanline_phase_shift_offset
+    ):
         """Process the image through NTSC scanline effects."""
         try:
             import comfyui_ntsc_rs
+
             HAS_RUST = True
         except ImportError:
             HAS_RUST = False
@@ -119,5 +139,9 @@ class NtscRsScanlinesNode(io.ComfyNode):
         return io.NodeOutput(output)
 
     @classmethod
-    async def execute(cls, image, use_field, video_scanline_phase_shift, video_scanline_phase_shift_offset):
-        return cls.process(image, use_field, video_scanline_phase_shift, video_scanline_phase_shift_offset)
+    async def execute(
+        cls, image, use_field, video_scanline_phase_shift, video_scanline_phase_shift_offset
+    ):
+        return cls.process(
+            image, use_field, video_scanline_phase_shift, video_scanline_phase_shift_offset
+        )

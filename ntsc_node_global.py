@@ -4,8 +4,8 @@ Applies global effects: snow, chroma phase noise/error, chroma delay.
 Part of the chainable NTSC-RS node system.
 """
 
-import torch
 import numpy as np
+import torch
 
 try:
     from comfy_api.latest import io
@@ -25,24 +25,69 @@ class NtscRsGlobalNode(io.ComfyNode):
             description="Global effects: snow speckles, chroma phase noise/error, chroma delay. Chain after other NTSC category nodes.",
             inputs=[
                 io.Image.Input("image", display_name="Image", tooltip="Image to process"),
-
-                io.Float.Input("snow_intensity", display_name="Snow Intensity", default=0.00025, min=0.0, max=100.0, step=0.00001,
-                    tooltip="Snow speckle frequency (logarithmic)"),
-                io.Float.Input("snow_anisotropy", display_name="Snow Anisotropy", default=0.5, min=0.0, max=1.0, step=0.01,
-                    tooltip="Snow anisotropy (row clustering)"),
-
-                io.Float.Input("chroma_phase_noise_intensity", display_name="Chroma Phase Noise", default=0.001, min=0.0, max=1.0, step=0.0001,
-                    tooltip="Chroma phase noise intensity (logarithmic)"),
-                io.Float.Input("chroma_phase_error", display_name="Chroma Phase Error", default=0.0, min=0.0, max=1.0, step=0.001,
-                    tooltip="Chroma phase error"),
-
-                io.Float.Input("chroma_delay_horizontal", display_name="Chroma Delay H", default=0.0, min=-40.0, max=40.0, step=0.1,
-                    tooltip="Horizontal chroma delay (pixels)"),
-                io.Int.Input("chroma_delay_vertical", display_name="Chroma Delay V", default=0, min=-20, max=20, step=1,
-                    tooltip="Vertical chroma delay (scanlines)"),
-
-                io.Int.Input("random_seed", display_name="Seed", default=0, min=-2147483648, max=2147483647, step=1,
-                    tooltip="Random seed for noise generation"),
+                io.Float.Input(
+                    "snow_intensity",
+                    display_name="Snow Intensity",
+                    default=0.00025,
+                    min=0.0,
+                    max=100.0,
+                    step=0.00001,
+                    tooltip="Snow speckle frequency (logarithmic)",
+                ),
+                io.Float.Input(
+                    "snow_anisotropy",
+                    display_name="Snow Anisotropy",
+                    default=0.5,
+                    min=0.0,
+                    max=1.0,
+                    step=0.01,
+                    tooltip="Snow anisotropy (row clustering)",
+                ),
+                io.Float.Input(
+                    "chroma_phase_noise_intensity",
+                    display_name="Chroma Phase Noise",
+                    default=0.001,
+                    min=0.0,
+                    max=1.0,
+                    step=0.0001,
+                    tooltip="Chroma phase noise intensity (logarithmic)",
+                ),
+                io.Float.Input(
+                    "chroma_phase_error",
+                    display_name="Chroma Phase Error",
+                    default=0.0,
+                    min=0.0,
+                    max=1.0,
+                    step=0.001,
+                    tooltip="Chroma phase error",
+                ),
+                io.Float.Input(
+                    "chroma_delay_horizontal",
+                    display_name="Chroma Delay H",
+                    default=0.0,
+                    min=-40.0,
+                    max=40.0,
+                    step=0.1,
+                    tooltip="Horizontal chroma delay (pixels)",
+                ),
+                io.Int.Input(
+                    "chroma_delay_vertical",
+                    display_name="Chroma Delay V",
+                    default=0,
+                    min=-20,
+                    max=20,
+                    step=1,
+                    tooltip="Vertical chroma delay (scanlines)",
+                ),
+                io.Int.Input(
+                    "random_seed",
+                    display_name="Seed",
+                    default=0,
+                    min=-2147483648,
+                    max=2147483647,
+                    step=1,
+                    tooltip="Random seed for noise generation",
+                ),
             ],
             outputs=[
                 io.Image.Output(tooltip="Processed image"),
@@ -60,11 +105,21 @@ class NtscRsGlobalNode(io.ComfyNode):
         )
 
     @classmethod
-    def process(cls, image, snow_intensity, snow_anisotropy, chroma_phase_noise_intensity,
-                chroma_phase_error, chroma_delay_horizontal, chroma_delay_vertical, random_seed):
+    def process(
+        cls,
+        image,
+        snow_intensity,
+        snow_anisotropy,
+        chroma_phase_noise_intensity,
+        chroma_phase_error,
+        chroma_delay_horizontal,
+        chroma_delay_vertical,
+        random_seed,
+    ):
         """Process the image through NTSC global effects."""
         try:
             import comfyui_ntsc_rs
+
             HAS_RUST = True
         except ImportError:
             HAS_RUST = False
@@ -122,7 +177,24 @@ class NtscRsGlobalNode(io.ComfyNode):
         return io.NodeOutput(output)
 
     @classmethod
-    async def execute(cls, image, snow_intensity, snow_anisotropy, chroma_phase_noise_intensity,
-                     chroma_phase_error, chroma_delay_horizontal, chroma_delay_vertical, random_seed):
-        return cls.process(image, snow_intensity, snow_anisotropy, chroma_phase_noise_intensity,
-                          chroma_phase_error, chroma_delay_horizontal, chroma_delay_vertical, random_seed)
+    async def execute(
+        cls,
+        image,
+        snow_intensity,
+        snow_anisotropy,
+        chroma_phase_noise_intensity,
+        chroma_phase_error,
+        chroma_delay_horizontal,
+        chroma_delay_vertical,
+        random_seed,
+    ):
+        return cls.process(
+            image,
+            snow_intensity,
+            snow_anisotropy,
+            chroma_phase_noise_intensity,
+            chroma_phase_error,
+            chroma_delay_horizontal,
+            chroma_delay_vertical,
+            random_seed,
+        )

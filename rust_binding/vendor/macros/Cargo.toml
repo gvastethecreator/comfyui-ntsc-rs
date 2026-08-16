@@ -1,7 +1,7 @@
 [package]
 name = "ntsc-rs-macros"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 license = "MIT OR ISC OR Apache-2.0"
 repository = "https://github.com/valadaptive/ntsc-rs/tree/main/crates/macros"
 
@@ -9,9 +9,9 @@ repository = "https://github.com/valadaptive/ntsc-rs/tree/main/crates/macros"
 proc-macro = true
 
 [dependencies]
-quote = "1.0.27"
-proc-macro2 = "1.0.56"
+quote = "1.0.47"
+proc-macro2 = "1.0.107"
 
 [dependencies.syn]
-version = "2.0.15"
+version = "3.0.3"
 features = ["full", "extra-traits"]

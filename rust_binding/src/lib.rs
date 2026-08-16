@@ -1,16 +1,18 @@
-use numpy::PyArray3;
+#![allow(linker_messages)]
+
+use numpy::{PyArray3, PyArrayMethods, PyReadonlyArray3};
 use pyo3::prelude::*;
-use pyo3::types::PyDict;
+use pyo3::types::{PyDict, PyDictMethods, PyModule, PyModuleMethods};
 
 use ntsc_rs::{
+    NtscEffect,
     settings::standard::{
         ChromaDemodulationFilter, ChromaLowpass, FbmNoiseSettings, FilterType,
         HeadSwitchingMidLineSettings, HeadSwitchingSettings, LumaLowpass, PhaseShift,
         RingingSettings, ScaleSettings, TrackingNoiseSettings, UseField, VHSEdgeWaveSettings,
         VHSSettings, VHSSharpenSettings, VHSTapeSpeed,
     },
-    yiq_fielding::{pixel_bytes_for, BlitInfo, DeinterlaceMode, Rgb, YiqView},
-    NtscEffect,
+    yiq_fielding::{BlitInfo, DeinterlaceMode, Rgb, YiqView, pixel_bytes_for},
 };
 
 fn parse_use_field(s: &str) -> UseField {
@@ -81,28 +83,28 @@ fn parse_tape_speed(s: &str) -> VHSTapeSpeed {
     }
 }
 
-fn get_i32(dict: &PyDict, key: &str, default: i32) -> i32 {
+fn get_i32(dict: &Bound<'_, PyDict>, key: &str, default: i32) -> i32 {
     match dict.get_item(key) {
         Ok(Some(v)) => v.extract::<i32>().ok().unwrap_or(default),
         _ => default,
     }
 }
 
-fn get_f32(dict: &PyDict, key: &str, default: f32) -> f32 {
+fn get_f32(dict: &Bound<'_, PyDict>, key: &str, default: f32) -> f32 {
     match dict.get_item(key) {
         Ok(Some(v)) => v.extract::<f32>().ok().unwrap_or(default),
         _ => default,
     }
 }
 
-fn get_bool(dict: &PyDict, key: &str, default: bool) -> bool {
+fn get_bool(dict: &Bound<'_, PyDict>, key: &str, default: bool) -> bool {
     match dict.get_item(key) {
         Ok(Some(v)) => v.extract::<bool>().ok().unwrap_or(default),
         _ => default,
     }
 }
 
-fn get_str(dict: &PyDict, key: &str, default: &str) -> String {
+fn get_str(dict: &Bound<'_, PyDict>, key: &str, default: &str) -> String {
     match dict.get_item(key) {
         Ok(Some(v)) => v
             .extract::<String>()
@@ -112,7 +114,7 @@ fn get_str(dict: &PyDict, key: &str, default: &str) -> String {
     }
 }
 
-fn build_ntsc_effect(dict: &PyDict) -> NtscEffect {
+fn build_ntsc_effect(dict: &Bound<'_, PyDict>) -> NtscEffect {
     let mut effect = NtscEffect::default();
 
     effect.random_seed = get_i32(dict, "random_seed", 0);
@@ -250,24 +252,40 @@ fn build_ntsc_effect(dict: &PyDict) -> NtscEffect {
 }
 
 #[pyfunction]
-pub fn apply_ntsc_filter(py: Python, image: &PyArray3<u8>, params: &PyDict) -> PyResult<Py<PyAny>> {
-    let image_array = unsafe { image.as_array() };
+pub fn apply_ntsc_filter(
+    py: Python<'_>,
+    image: PyReadonlyArray3<'_, u8>,
+    params: &Bound<'_, PyDict>,
+) -> PyResult<Py<PyArray3<u8>>> {
+    let image_array = image.as_array();
     let (height, width, channels) = (
         image_array.shape()[0],
         image_array.shape()[1],
         image_array.shape()[2],
     );
-
-    let mut rgb_buffer = vec![0u8; width * height * 3];
-    for y in 0..height {
-        for x in 0..width {
-            let src_idx = (y * width + x) * channels;
-            let dst_idx = (y * width + x) * 3;
-            rgb_buffer[dst_idx] = image_array[[y, x, 0]];
-            rgb_buffer[dst_idx + 1] = image_array[[y, x, 1.min(channels - 1)]];
-            rgb_buffer[dst_idx + 2] = image_array[[y, x, 2.min(channels - 1)]];
-        }
+    if channels == 0 {
+        return Err(pyo3::exceptions::PyValueError::new_err(
+            "image must contain at least one channel",
+        ));
     }
+
+    let rgb_buffer = if channels == 3 {
+        match image.as_slice() {
+            Ok(contiguous) => contiguous.to_vec(),
+            Err(_) => image_array.iter().copied().collect(),
+        }
+    } else {
+        let mut converted = vec![0u8; width * height * 3];
+        for y in 0..height {
+            for x in 0..width {
+                let dst_idx = (y * width + x) * 3;
+                converted[dst_idx] = image_array[[y, x, 0]];
+                converted[dst_idx + 1] = image_array[[y, x, 1.min(channels - 1)]];
+                converted[dst_idx + 2] = image_array[[y, x, 2.min(channels - 1)]];
+            }
+        }
+        converted
+    };
 
     let effect = build_ntsc_effect(params);
     let frame_num = get_i32(params, "frame_num", 0);
@@ -298,11 +316,11 @@ pub fn apply_ntsc_filter(py: Python, image: &PyArray3<u8>, params: &PyDict) -> P
     let array = unsafe { PyArray3::new(py, (height, width, 3), false) };
     let slice = unsafe { array.as_slice_mut()? };
     slice.copy_from_slice(&output_buffer);
-    Ok(array.to_object(py))
+    Ok(array.unbind())
 }
 
 #[pymodule]
-fn comfyui_ntsc_rs(_: Python, m: &PyModule) -> PyResult<()> {
+fn comfyui_ntsc_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(apply_ntsc_filter, m)?)?;
     Ok(())
 }

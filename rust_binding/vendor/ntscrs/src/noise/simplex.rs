@@ -43,8 +43,7 @@ fn gradient_1d<S: Simd>(hash: S::u32s) -> S::f32s {
     let v = ((h & 7) + 1).to_float::<S::f32s>();
 
     let h_and_8 = (h & 8).simd_eq(S::u32s::splat(hash.witness(), 0));
-    //h_and_8.select(v, -v)
-    v.copysign(h_and_8.bitcast::<S::f32s>())
+    h_and_8.select(-v, v)
 }
 
 #[inline(always)]

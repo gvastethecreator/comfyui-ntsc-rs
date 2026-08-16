@@ -4,8 +4,8 @@ Applies VHS-specific effects: tape speed, chroma loss, sharpen, edge wave.
 Part of the chainable NTSC-RS node system.
 """
 
-import torch
 import numpy as np
+import torch
 
 try:
     from comfy_api.latest import io
@@ -28,35 +28,97 @@ class NtscRsVHSNode(io.ComfyNode):
             description="VHS-specific effects: tape speed, chroma loss, sharpening, edge wave. Chain after other NTSC category nodes.",
             inputs=[
                 io.Image.Input("image", display_name="Image", tooltip="Image to process"),
-
-                io.Combo.Input("vhs_tape_speed", display_name="VHS Tape Speed",
+                io.Combo.Input(
+                    "vhs_tape_speed",
+                    display_name="VHS Tape Speed",
                     options=VHS_TAPE_SPEED_OPTIONS,
                     default="SP",
                     tooltip="VHS tape speed (affects high-frequency cutoff)",
                 ),
-                io.Float.Input("vhs_chroma_loss", display_name="VHS Chroma Loss", default=0.000025, min=0.0, max=1.0, step=0.000001,
-                    tooltip="Chroma loss probability per scanline"),
-
-                io.Boolean.Input("vhs_sharpen_enabled", display_name="VHS Sharpen", default=True,
-                    tooltip="Enable VHS sharpening"),
-                io.Float.Input("vhs_sharpen_intensity", display_name="Sharpen Intensity", default=0.25, min=0.0, max=5.0, step=0.01,
-                    tooltip="VHS sharpen intensity"),
-                io.Float.Input("vhs_sharpen_frequency", display_name="Sharpen Frequency", default=1.0, min=0.5, max=4.0, step=0.01,
-                    tooltip="VHS sharpen frequency"),
-
-                io.Boolean.Input("vhs_edge_wave_enabled", display_name="Edge Wave", default=True,
-                    tooltip="Enable edge wave effect"),
-                io.Float.Input("vhs_edge_wave_intensity", display_name="Edge Wave Intensity", default=0.5, min=0.0, max=20.0, step=0.01,
-                    tooltip="Edge wave intensity (pixels)"),
-                io.Float.Input("vhs_edge_wave_speed", display_name="Edge Wave Speed", default=4.0, min=0.0, max=10.0, step=0.1,
-                    tooltip="Edge wave speed"),
-                io.Float.Input("vhs_edge_wave_frequency", display_name="Edge Wave Frequency", default=0.05, min=0.0, max=0.5, step=0.001,
-                    tooltip="Edge wave frequency"),
-                io.Int.Input("vhs_edge_wave_detail", display_name="Edge Wave Detail", default=2, min=1, max=5, step=1,
-                    tooltip="Edge wave detail (octaves)"),
-
-                io.Int.Input("random_seed", display_name="Seed", default=0, min=-2147483648, max=2147483647, step=1,
-                    tooltip="Random seed for noise generation"),
+                io.Float.Input(
+                    "vhs_chroma_loss",
+                    display_name="VHS Chroma Loss",
+                    default=0.000025,
+                    min=0.0,
+                    max=1.0,
+                    step=0.000001,
+                    tooltip="Chroma loss probability per scanline",
+                ),
+                io.Boolean.Input(
+                    "vhs_sharpen_enabled",
+                    display_name="VHS Sharpen",
+                    default=True,
+                    tooltip="Enable VHS sharpening",
+                ),
+                io.Float.Input(
+                    "vhs_sharpen_intensity",
+                    display_name="Sharpen Intensity",
+                    default=0.25,
+                    min=0.0,
+                    max=5.0,
+                    step=0.01,
+                    tooltip="VHS sharpen intensity",
+                ),
+                io.Float.Input(
+                    "vhs_sharpen_frequency",
+                    display_name="Sharpen Frequency",
+                    default=1.0,
+                    min=0.5,
+                    max=4.0,
+                    step=0.01,
+                    tooltip="VHS sharpen frequency",
+                ),
+                io.Boolean.Input(
+                    "vhs_edge_wave_enabled",
+                    display_name="Edge Wave",
+                    default=True,
+                    tooltip="Enable edge wave effect",
+                ),
+                io.Float.Input(
+                    "vhs_edge_wave_intensity",
+                    display_name="Edge Wave Intensity",
+                    default=0.5,
+                    min=0.0,
+                    max=20.0,
+                    step=0.01,
+                    tooltip="Edge wave intensity (pixels)",
+                ),
+                io.Float.Input(
+                    "vhs_edge_wave_speed",
+                    display_name="Edge Wave Speed",
+                    default=4.0,
+                    min=0.0,
+                    max=10.0,
+                    step=0.1,
+                    tooltip="Edge wave speed",
+                ),
+                io.Float.Input(
+                    "vhs_edge_wave_frequency",
+                    display_name="Edge Wave Frequency",
+                    default=0.05,
+                    min=0.0,
+                    max=0.5,
+                    step=0.001,
+                    tooltip="Edge wave frequency",
+                ),
+                io.Int.Input(
+                    "vhs_edge_wave_detail",
+                    display_name="Edge Wave Detail",
+                    default=2,
+                    min=1,
+                    max=5,
+                    step=1,
+                    tooltip="Edge wave detail (octaves)",
+                ),
+                io.Int.Input(
+                    "random_seed",
+                    display_name="Seed",
+                    default=0,
+                    min=-2147483648,
+                    max=2147483647,
+                    step=1,
+                    tooltip="Random seed for noise generation",
+                ),
             ],
             outputs=[
                 io.Image.Output(tooltip="Processed image"),
@@ -74,13 +136,25 @@ class NtscRsVHSNode(io.ComfyNode):
         )
 
     @classmethod
-    def process(cls, image, vhs_tape_speed, vhs_chroma_loss, vhs_sharpen_enabled,
-               vhs_sharpen_intensity, vhs_sharpen_frequency, vhs_edge_wave_enabled,
-               vhs_edge_wave_intensity, vhs_edge_wave_speed, vhs_edge_wave_frequency, vhs_edge_wave_detail,
-               random_seed):
+    def process(
+        cls,
+        image,
+        vhs_tape_speed,
+        vhs_chroma_loss,
+        vhs_sharpen_enabled,
+        vhs_sharpen_intensity,
+        vhs_sharpen_frequency,
+        vhs_edge_wave_enabled,
+        vhs_edge_wave_intensity,
+        vhs_edge_wave_speed,
+        vhs_edge_wave_frequency,
+        vhs_edge_wave_detail,
+        random_seed,
+    ):
         """Process the image through NTSC VHS effects."""
         try:
             import comfyui_ntsc_rs
+
             HAS_RUST = True
         except ImportError:
             HAS_RUST = False
@@ -147,11 +221,32 @@ class NtscRsVHSNode(io.ComfyNode):
         return io.NodeOutput(output)
 
     @classmethod
-    async def execute(cls, image, vhs_tape_speed, vhs_chroma_loss, vhs_sharpen_enabled,
-                     vhs_sharpen_intensity, vhs_sharpen_frequency, vhs_edge_wave_enabled,
-                     vhs_edge_wave_intensity, vhs_edge_wave_speed, vhs_edge_wave_frequency, vhs_edge_wave_detail,
-                     random_seed):
-        return cls.process(image, vhs_tape_speed, vhs_chroma_loss, vhs_sharpen_enabled,
-                          vhs_sharpen_intensity, vhs_sharpen_frequency, vhs_edge_wave_enabled,
-                          vhs_edge_wave_intensity, vhs_edge_wave_speed, vhs_edge_wave_frequency, vhs_edge_wave_detail,
-                          random_seed)
+    async def execute(
+        cls,
+        image,
+        vhs_tape_speed,
+        vhs_chroma_loss,
+        vhs_sharpen_enabled,
+        vhs_sharpen_intensity,
+        vhs_sharpen_frequency,
+        vhs_edge_wave_enabled,
+        vhs_edge_wave_intensity,
+        vhs_edge_wave_speed,
+        vhs_edge_wave_frequency,
+        vhs_edge_wave_detail,
+        random_seed,
+    ):
+        return cls.process(
+            image,
+            vhs_tape_speed,
+            vhs_chroma_loss,
+            vhs_sharpen_enabled,
+            vhs_sharpen_intensity,
+            vhs_sharpen_frequency,
+            vhs_edge_wave_enabled,
+            vhs_edge_wave_intensity,
+            vhs_edge_wave_speed,
+            vhs_edge_wave_frequency,
+            vhs_edge_wave_detail,
+            random_seed,
+        )

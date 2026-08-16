@@ -1,346 +1,125 @@
-# ComfyUI NTSC-RS
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/header/document.svg?title=ComfyUI+NTSC-RS&subtitle=Native+VHS%2C+CRT%2C+and+analog+signal+effects&logo=rust&theme=red&align=center&mode=dark" />
+    <img alt="ComfyUI NTSC-RS — native VHS, CRT, and analog signal effects" src="https://shieldcn.dev/header/document.svg?title=ComfyUI+NTSC-RS&subtitle=Native+VHS%2C+CRT%2C+and+analog+signal+effects&logo=rust&theme=red&align=center&mode=light" />
+  </picture>
+</p>
 
-<!-- IMAGE PLACEHOLDER - Add your preview images here -->
-<!-- 
-![NTSC-RS Preview](assets/preview.gif)
-![NTSC-RS Nodes](assets/nodes.png)
--->
-[![GitHub stars](https://img.shields.io/github/stars/YOUR_USERNAME/comfyui-ntscrs?style=social)](https://github.com/YOUR_USERNAME/comfyui-ntscrs)
-[![License](https://img.shields.io/badge/license-MIT%2FISC%2FApache--2.0-blue)](LICENSE)
-[![Rust](https://img.shields.io/badge/rust-1.85%2B-orange)](https://rustup.rs/)
+<p align="center">
+  <a href="https://github.com/gvastethecreator/comfyui-ntsc-rs/actions/workflows/ci.yml"><img alt="CI status" src="https://shieldcn.dev/github/ci/gvastethecreator/comfyui-ntsc-rs.svg?workflow=ci&branch=main&variant=secondary&size=xs" /></a>
+  <a href="https://gvastethecreator.github.io/comfyui-ntsc-rs/"><img alt="Project site" src="https://shieldcn.dev/badge/site-pages-243f8f.svg?logo=githubpages&variant=branded&size=xs" /></a>
+  <a href="https://www.python.org/"><img alt="Python 3.12 or newer" src="https://shieldcn.dev/badge/Python-3.12%2B-3776AB.svg?logo=python&variant=branded&size=xs" /></a>
+  <a href="https://rustup.rs/"><img alt="Rust 1.89 or newer" src="https://shieldcn.dev/badge/Rust-1.89%2B-000000.svg?logo=rust&variant=branded&size=xs" /></a>
+  <a href="LICENSE"><img alt="MIT, ISC, or Apache 2.0 license" src="https://shieldcn.dev/github/license/gvastethecreator/comfyui-ntsc-rs.svg?variant=secondary&size=xs" /></a>
+</p>
 
-================================================================================
-Native VHS/CRT/NTSC Video Effect Processing for ComfyUI
-================================================================================
+Native VHS, CRT, and NTSC effects for ComfyUI. Ten nodes combine a Python UI layer with the vendored `ntsc-rs` signal processor compiled through Rust, PyO3, and Maturin.
 
-A ComfyUI custom node extension providing high-quality VHS and CRT video effect
-emulation using the [ntsc-rs](https://github.com/ntsc-rs/ntsc-rs) Rust library via
-native PyO3 bindings.
+[Project site](https://gvastethecreator.github.io/comfyui-ntsc-rs/) · [Source and issues](https://github.com/gvastethecreator/comfyui-ntsc-rs)
 
-## Features
+- Process ComfyUI image tensors through the native YIQ signal pipeline.
+- Start quickly with 14 presets or expose more than 60 parameters.
+- Chain isolated signal, scanline, artifact, noise, VHS, global, and scale nodes.
+- Keep processing local: no account, telemetry, upload, or hosted inference.
 
-- **Native Rust Binding** - High-performance tensor processing via PyO3 (no subprocess)
-- **10 Node Types** - 3 Full nodes + 7 Chainable category nodes
-- **60+ Parameters** - Complete access to ntsc-rs signal processing
-- **14 VHS/CRT Presets** - Quick access to classic looks
-- **Chainable Nodes** - Combine category-specific nodes for custom pipelines
-- **1:1 Quality** - Direct access to ntsc-rs `apply_effect_to_yiq()`
+## Output gallery
 
-## Quick Preview
+The source fixture was created with OpenAI Imagegen. Every processed frame below was rendered by the compiled extension and repository presets; these are not simulated overlays.
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│  BEFORE                        AFTER (VHS Classic)                        │
-│  ┌─────────┐                  ┌─────────┐                                 │
-│  │         │    ───────►      │ ░░░░░░░ │                                 │
-│  │  Clean  │                  │ ░ VHS ░ │                                 │
-│  │  Image  │                  │ ░░░░░░░ │                                 │
-│  └─────────┘                  └─────────┘                                 │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
+| Clean source | VHS Classic |
+| --- | --- |
+| <img src="docs/assets/gallery/source.webp" alt="Matte television, blue sphere, and red paper ribbon before processing" /> | <img src="docs/assets/gallery/vhs-classic.webp" alt="The same still life after the VHS Classic preset" /> |
+| **CRT TV** | **Security Cam** |
+| <img src="docs/assets/gallery/crt-tv.webp" alt="CRT TV output with softened horizontal detail and field texture" /> | <img src="docs/assets/gallery/security-cam.webp" alt="Security Camera output with noise and reduced clarity" /> |
 
-## Nodes Overview
+See [gallery provenance](docs/assets/gallery/README.md) for the exact rendering boundary.
 
-### Full Nodes (All Effects Combined)
+## Requirements
 
-| Node | Description |
-|------|-------------|
-| **NTSC-RS Simple** | Preset-based with intensity/saturation control |
-| **NTSC-RS Intermediate** | Presets with scaling controls |
-| **NTSC-RS Advanced** | Full parameter access (60+ settings) |
+- ComfyUI with `comfy_api.latest`
+- Python 3.12 or newer
+- Rust 1.89 or newer
+- Windows, Linux, or macOS toolchain able to build a native Python extension
 
-### Category Nodes (Chainable)
+This repository has no JavaScript package graph, so Bun and pnpm do not apply.
 
-Each node applies ONLY its category of effects, allowing flexible pipelines:
+## Install
 
-| Node | Effects Applied |
-|------|----------------|
-| **NTSC-RS Signal** | Filter types, luma/chroma filters, smear, sharpening |
-| **NTSC-RS Scanlines** | Field mode, scanline phase shift |
-| **NTSC-RS Artifacts** | Head switching, tracking noise |
-| **NTSC-RS Noise** | Composite, luma, chroma noise, ringing |
-| **NTSC-RS VHS** | Tape speed, chroma loss, sharpen, edge wave |
-| **NTSC-RS Global** | Snow speckles, chroma phase, delays |
-| **NTSC-RS Scale** | Resolution scaling (H/V) |
+Clone the repository inside `ComfyUI/custom_nodes`, activate the same Python environment used by ComfyUI, then build and install the native wheel:
 
-## Installation
-
-### Option 1: Pre-built Wheel (Recommended)
-
-```bash
-# Navigate to your ComfyUI custom_nodes directory
-cd path/to/ComfyUI/custom_nodes
-
-# Clone this repository
-git clone https://github.com/YOUR_USERNAME/comfyui-ntscrs.git
-cd comfyui-ntscrs
-
-# Install the pre-built wheel for your Python environment
-pip install wheels/comfyui_ntsc_rs-0.1.0-cp312-cp312-win_amd64.whl
+```powershell
+git clone https://github.com/gvastethecreator/comfyui-ntsc-rs.git
+cd comfyui-ntsc-rs
+python -m pip install -r requirements.txt
+python build_node.py --install
 ```
 
-**Note**: Replace `cp312` with your Python version if different (e.g., `cp311` for Python 3.11).
+Restart ComfyUI. A successful load prints one concise `[NTSC-RS] Loaded 10 nodes` message.
 
-### Option 2: Build from Source
+`build_node.py` never installs tools, copies files, or changes a ComfyUI directory unless `--install` is explicitly passed. Use `--python PATH` when the target ComfyUI interpreter is not active:
 
-If you need to rebuild the native extension:
-
-```bash
-# Install build dependencies
-pip install maturin
-
-# Clone and build
-git clone https://github.com/YOUR_USERNAME/comfyui-ntscrs.git
-cd comfyui-ntscrs
-python build_node.py
+```powershell
+python build_node.py --python C:\path\to\ComfyUI\venv\Scripts\python.exe --install
 ```
 
-Requirements for building:
-- Rust toolchain (1.85+ for Rust 2024 edition support)
-- Maturin (`pip install maturin`)
+## Nodes
 
-### Post-Installation
+| Node | Use |
+| --- | --- |
+| NTSC-RS Simple | Pick one of 14 presets and adjust intensity or saturation. |
+| NTSC-RS Intermediate | Combine presets, scaling, field mode, and seed controls. |
+| NTSC-RS Advanced | Control the complete signal-processing surface. |
+| NTSC-RS Signal | Tune luma, chroma, smear, and sharpening. |
+| NTSC-RS Scanlines | Set field mode, phase, and phase offset. |
+| NTSC-RS Artifacts | Add head switching and tracking artifacts. |
+| NTSC-RS Noise | Add composite, luma, chroma, and ringing noise. |
+| NTSC-RS VHS | Control tape speed, chroma loss, sharpening, and edge wave. |
+| NTSC-RS Global | Add snow, phase variation, and chroma delay. |
+| NTSC-RS Scale | Apply horizontal and vertical signal scaling. |
 
-1. Restart ComfyUI
-2. The nodes will appear under category: `NTSC`
-
-## Usage
-
-### Quick Start with Presets
-
-Use `NTSC-RS Simple` for quick VHS/CRT looks:
-
-```
-Image → [NTSC-RS Simple] → Output
-         preset: VHS Classic
-         intensity: 1.0
-```
-
-### Chainable Category Nodes
-
-Combine multiple category nodes for custom processing:
-
-```
-Image → [NTSC-RS Signal] → [NTSC-RS Scanlines] → [NTSC-RS VHS] → Output
-              ↓                   ↓                    ↓
-         filter: Butterworth   field: InterleavedUpper   tape: SP
-         luma: Notch          phase: 180°              chroma_loss: 0.000025
-```
-
-### Full Control
-
-Use `NTSC-RS Advanced` for complete parameter access:
-
-```
-Image → [NTSC-RS Advanced] → Output
-         filter_type: Butterworth
-         head_switching_enabled: True
-         vhs_tape_speed: SP
-         ... (60+ parameters)
-```
-
-## Presets
-
-### VHS Presets
-
-| Preset | Description |
-|--------|-------------|
-| VHS Classic | Standard VHS SP recording quality |
-| VHS Worn | Well-used tape with tracking issues |
-| VHS Professional | High-quality S-VHS recording |
-| VHS Economy | Low-quality EP recording |
-| VHS Baby | Degraded, old tape |
-
-### CRT Presets
-
-| Preset | Description |
-|--------|-------------|
-| CRT TV | Old television with CRT display |
-| CRT Arcade | Arcade monitor with sharp pixels |
-| PVM Style | Professional video monitor |
-
-### Other Presets
-
-| Preset | Description |
-|--------|-------------|
-| Clean NTSC | Minimal processing, clean output |
-| Game Console | Retro console (NES/SNES era) |
-| Camcorder | Handheld camera recording |
-| Security Cam | Low-quality surveillance |
-| Test Pattern | Technical test signal |
-| Cassette Recorder | Audio cassette tape emulation |
-
-## Changelog
-
-### [0.1.0] - 2026-03-21
-
-#### Added
-- 10 node types: 3 Full + 7 Chainable category nodes
-- 14 VHS/CRT presets
-- Native PyO3 Rust binding (no subprocess)
-- `ntsc-rs` library via vendored copy
-- ASCII-formatted startup logs
-- VS Code tasks.json for build/deploy
-
-#### Fixed
-- Scale node now performs actual image resizing via PyTorch (was using ntsc-rs internal scale params which don't change dimensions)
-- Intermediate node now performs actual image resizing
-- All category nodes properly disable non-relevant effects for optimized processing
-
-#### Changed
-- README updated with better documentation and image placeholders
-- All nodes now use `display_name` for readable labels in ComfyUI UI
-
-## Tensor Processing Pipeline
-
-```
-PyTorch [B,H,W,C] float32
-    ↓
-numpy [H,W,C] uint8 (RGB)
-    ↓
-Rust: YIQ colorspace conversion
-    ↓
-ntsc-rs: apply_effect_to_yiq()
-    ↓
-Rust: YIQ to RGB conversion
-    ↓
-numpy [H,W,C] uint8
-    ↓
-PyTorch [B,H,W,C] float32
-```
+Start with **Simple**. Use the chainable nodes when a workflow needs one isolated effect family. Use **Advanced** only when every parameter must be exposed.
 
 ## Development
 
-### VS Code Tasks
+Create and activate a local virtual environment before installing development tools:
 
-Press `Ctrl+Shift+P` and type "Run Task" to access:
-
-| Task | Description |
-|------|-------------|
-| Build Rust Extension | Builds the PyO3 Rust extension |
-| Copy to ComfyUI | Copies all files to ComfyUI custom_nodes |
-| Build & Copy All | Builds and copies in one step |
-| Copy Python Files Only | Quick Python-only sync |
-| Clear ComfyUI Cache | Removes __pycache__ folders |
-| Full Deploy Cycle | Build + Copy + Clear cache |
-
-### Project Structure
-
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -e ".[dev]"
+python scripts\verify.py
 ```
-comfyui-ntscrs/
-├── __init__.py                 # ComfyUI extension entry point
-├── ntsc_node.py               # Advanced node (60+ parameters)
-├── ntsc_node_simple.py         # Simple preset-based node
-├── ntsc_node_intermediate.py    # Intermediate with scaling
-├── ntsc_presets.py            # 14 preset definitions
-│
-├── ntsc_node_signal.py         # Category: Signal processing
-├── ntsc_node_scanlines.py      # Category: Scanlines/fields
-├── ntsc_node_artifacts.py      # Category: Head switching
-├── ntsc_node_noise.py          # Category: Noise layers
-├── ntsc_node_vhs.py            # Category: VHS effects
-├── ntsc_node_global.py          # Category: Global effects
-├── ntsc_node_scale.py          # Category: Scaling
-│
-├── build_node.py               # Rust binding build script
-├── wheels/                     # Pre-built wheels
-│   └── comfyui_ntsc_rs-*.whl
-├── rust_binding/              # PyO3 Rust project
-│   ├── Cargo.toml
-│   ├── pyproject.toml
-│   └── src/lib.rs
-├── .vscode/
-│   ├── settings.json
-│   └── tasks.json
-└── vendor/                    # Vendored ntsc-rs
-    ├── ntscrs/
-    └── macros/
+
+Common commands:
+
+```powershell
+python scripts\verify.py --fix     # format Python and Rust
+python build_node.py --check       # validate the Rust binding
+python build_node.py --dev         # build a fast development wheel
+python build_node.py               # build an optimized wheel
+python scripts\clean_generated.py  # remove local build and cache output
 ```
+
+After installing a development wheel, run `python scripts/native_smoke.py` to check contiguous RGB, strided RGB, one-channel expansion, and invalid zero-channel input.
 
 ## Troubleshooting
 
-### "Module not found: comfyui_ntsc_rs"
+- **`maturin>=1.14.1 is required`**: install `requirements.txt` in the selected Python environment.
+- **`Rust/Cargo not found`**: install Rust from [rustup.rs](https://rustup.rs/) and restart the terminal.
+- **Wheel tag does not match Python**: rebuild with the exact ComfyUI interpreter through `--python`.
+- **Node import fails**: confirm ComfyUI uses Python 3.12+ and that `comfyui_ntsc_rs` is installed in that same environment.
 
-Install the wheel:
-```bash
-pip install wheels/comfyui_ntsc_rs-0.1.0-cp312-cp312-win_amd64.whl
-```
+## Project notes
 
-### Build fails with Rust errors
+- [Architecture](docs/ARCHITECTURE.md)
+- [Dependencies and migration notes](docs/DEPENDENCIES.md)
+- [Maintenance report](docs/MAINTENANCE_REPORT.md)
+- [Known technical debt](docs/TECHNICAL_DEBT.md)
 
-Make sure you have Rust 1.85+:
-```bash
-rustc --version
-cargo --version
-```
+## Support
 
-If not, install from https://rustup.rs/
-
-### Nodes not appearing in UI
-
-1. Check ComfyUI console for `[NTSC-RS]` log messages
-2. Ensure the extension loaded without errors
-3. Try clearing `__pycache__` in the custom_nodes folder
-4. Restart ComfyUI completely
-
-### Scale/Resize not working
-
-The Scale node uses PyTorch interpolation for actual resizing. The ntsc-rs
-internal `horizontal_scale` and `vertical_scale` parameters only affect signal
-processing (filter bandwidth), not image dimensions.
-
-## Building Wheels for Other Platforms
-
-To build a wheel for a different platform (e.g., Linux from Windows):
-
-```bash
-# Install cross-compilation toolchain
-rustup target add x86_64-unknown-linux-gnu
-
-# Build
-python build_node.py --target x86_64-unknown-linux-gnu
-```
-
-## Technical Notes
-
-### Category Nodes Optimization
-
-Category nodes are designed for **minimal processing**. Each node:
-- Applies ONLY its category of effects
-- Disables all other effect categories
-- Sets unaffected parameters to safe defaults
-
-This allows chaining without unnecessary computation.
-
-### ntsc-rs Parameters
-
-The underlying ntsc-rs library provides:
-
-| Category | Parameters |
-|----------|------------|
-| Signal Processing | 7 (filter types, smear, sharpening) |
-| Field Processing | 3 (field mode, phase) |
-| VHS Artifacts | 13 (head switching, tracking) |
-| Noise Layers | 15 (composite, luma, chroma, ringing) |
-| VHS Effects | 9 (tape speed, chroma loss, sharpen, edge wave) |
-| Global Effects | 6 (snow, chroma phase, delays) |
-| Scaling | 4 (horizontal, vertical, video-size) |
-
-**Total: 60+ parameters**
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit issues or pull requests.
+If this project saves you time, you can [sponsor the work on GitHub](https://github.com/sponsors/gvastethecreator) or [support it on Ko-fi](https://ko-fi.com/gvaste).
 
 ## License
 
-MIT / ISC / Apache-2.0 (same as ntsc-rs)
-
-ntsc-rs is licensed under MIT OR ISC OR Apache-2.0.
-
-## References
-
-- [ntsc-rs](https://github.com/ntsc-rs/ntsc-rs) - Original Rust library
-- [PyO3](https://pyo3.rs/) - Python/Rust bindings
-- [ComfyUI Custom Nodes](https://docs.comfy.org/development/core-concepts/custom-nodes) - ComfyUI development docs
-- [ComfyUI Manager](https://github.com/ltdrdata/ComfyUI-Manager) - For easy installation
+This integration and its vendored components retain their declared MIT, ISC, and Apache-2.0 terms. See [LICENSE](LICENSE) and the vendored crate manifests.
