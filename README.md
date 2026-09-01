@@ -37,8 +37,8 @@ See [gallery provenance](docs/assets/gallery/README.md) for the exact rendering 
 ## Requirements
 
 - ComfyUI with `comfy_api.latest`
-- Python 3.12 or newer
-- Rust 1.89 or newer
+- Python 3.12 or newer (NumPy 2.5.2 dropped 3.10 and 3.11)
+- Rust 1.89 or newer (current SIMD crate; edition 2024)
 - Windows, Linux, or macOS toolchain able to build a native Python extension
 
 This repository has no JavaScript package graph, so Bun and pnpm do not apply.
@@ -61,6 +61,8 @@ Restart ComfyUI. A successful load prints one concise `[NTSC-RS] Loaded 10 nodes
 ```powershell
 python build_node.py --python C:\path\to\ComfyUI\venv\Scripts\python.exe --install
 ```
+
+ComfyUI loads nodes through `ComfyExtension`. `NODE_CLASS_MAPPINGS` remains for older loaders.
 
 ## Nodes
 
@@ -90,6 +92,8 @@ python -m pip install -e ".[dev]"
 python scripts\verify.py
 ```
 
+`Cargo.lock` is authoritative. Build and verify commands pass `--locked`.
+
 Common commands:
 
 ```powershell
@@ -102,19 +106,14 @@ python scripts\clean_generated.py  # remove local build and cache output
 
 After installing a development wheel, run `python scripts/native_smoke.py` to check contiguous RGB, strided RGB, one-channel expansion, and invalid zero-channel input.
 
+Current pins and migration notes: [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md).
+
 ## Troubleshooting
 
 - **`maturin>=1.14.1 is required`**: install `requirements.txt` in the selected Python environment.
 - **`Rust/Cargo not found`**: install Rust from [rustup.rs](https://rustup.rs/) and restart the terminal.
 - **Wheel tag does not match Python**: rebuild with the exact ComfyUI interpreter through `--python`.
 - **Node import fails**: confirm ComfyUI uses Python 3.12+ and that `comfyui_ntsc_rs` is installed in that same environment.
-
-## Project notes
-
-- [Architecture](docs/ARCHITECTURE.md)
-- [Dependencies and migration notes](docs/DEPENDENCIES.md)
-- [Maintenance report](docs/MAINTENANCE_REPORT.md)
-- [Known technical debt](docs/TECHNICAL_DEBT.md)
 
 ## Support
 
