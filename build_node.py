@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Build the comfyui-ntsc-rs native extension without mutating ComfyUI."""
+"""Build the comfyui-ntsc-rs native extension and place it where the custom node loads it.
+
+The binary lands in ./native/, so ComfyUI finds it with any Python 3.12+ and no pip install.
+"""
 
 from __future__ import annotations
 
@@ -7,12 +10,13 @@ import argparse
 import shutil
 import subprocess
 import sys
+import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 RUST_BINDING = ROOT / "rust_binding"
 WHEEL_DIRECTORY = RUST_BINDING / "target" / "wheels"
-MINIMUM_MATURIN = (1, 14, 1)
+MINIMUM_MATURIN = (1, 16, 0)
 LOCAL_PYTHONS = (
     ROOT / ".venv" / "Scripts" / "python.exe",
     ROOT / "venv" / "Scripts" / "python.exe",
@@ -73,9 +77,29 @@ def require_tooling(python: str) -> str:
         required = ".".join(map(str, MINIMUM_MATURIN))
         raise SystemExit(
             f"maturin>={required} is required for {python}. "
-            f'Install it with: "{python}" -m pip install -r "{ROOT / "requirements.txt"}"'
+            f'Install it with: "{python}" -m pip install "maturin>={required}"'
         )
     return executable
+
+
+def bundle(wheel: Path) -> Path:
+    """Copy the wheel's extension module into ./native/ under the name native.py loads."""
+    sys.path.insert(0, str(ROOT))
+    from native import NATIVE_DIR, binary_name
+
+    name = binary_name()
+    if name is None:
+        raise SystemExit("No native/ name for this platform; use --install instead.")
+    with zipfile.ZipFile(wheel) as archive:
+        member = next(n for n in archive.namelist() if n.endswith((".pyd", ".so")))
+        NATIVE_DIR.mkdir(exist_ok=True)
+        target = NATIVE_DIR / name
+        try:
+            target.write_bytes(archive.read(member))
+        except PermissionError:
+            raise SystemExit(f"{target} is in use. Stop ComfyUI, then rerun this command.")
+    print(f"Bundled {member} as {target}", flush=True)
+    return target
 
 
 def build(python: str, *, release: bool, install: bool) -> Path:
@@ -116,6 +140,8 @@ def build(python: str, *, release: bool, install: bool) -> Path:
     else:
         print(f"Created wheel: {wheel}", flush=True)
 
+    bundle(wheel)
+
     if install:
         result = run([python, "-m", "pip", "install", "--force-reinstall", "--no-deps", str(wheel)])
         if result.returncode != 0:
@@ -128,7 +154,9 @@ def build(python: str, *, release: bool, install: bool) -> Path:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dev", action="store_true", help="Build an unoptimized wheel.")
-    parser.add_argument("--install", action="store_true", help="Install the wheel after building.")
+    parser.add_argument(
+        "--install", action="store_true", help="Also pip-install the wheel into --python."
+    )
     parser.add_argument("--python", help="Target Python executable or command.")
     parser.add_argument(
         "--check",

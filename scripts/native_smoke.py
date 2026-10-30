@@ -1,9 +1,18 @@
-"""Exercise the installed native extension at its public NumPy boundary."""
+"""Exercise the native extension, loaded the way the custom node loads it, at its NumPy boundary."""
 
 from __future__ import annotations
 
-import comfyui_ntsc_rs
+import sys
+from pathlib import Path
+
 import numpy as np
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+import native  # noqa: E402
+
+comfyui_ntsc_rs = native.load_native(allow_download=False)
+if comfyui_ntsc_rs is None:
+    raise SystemExit(native.problem)
 
 
 def main() -> int:

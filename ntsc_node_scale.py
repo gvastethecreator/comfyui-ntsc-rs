@@ -1,31 +1,41 @@
 """NTSC Scale Node.
 
-Applies resolution scaling: horizontal and vertical scale factors.
-Part of the chainable NTSC-RS node system.
+Resizes images with PyTorch interpolation. Part of the chainable NTSC-RS node system.
 
 Note: ntsc-rs scale parameters (horizontal_scale/vertical_scale) affect signal
-processing (filter bandwidth), not image dimensions. This node performs actual
-image resizing using PyTorch interpolation.
+processing (filter bandwidth), not image dimensions. This node only resizes.
 """
 
-import numpy as np
 import torch
 import torch.nn.functional as F
+from comfy_api.latest import io
 
-try:
-    from comfy_api.latest import io
-except ImportError:
-    from comfy import io
+SCALE_PRESETS = {
+    "Source (1x)": 1.0,
+    "Half (0.5x)": 0.5,
+    "Quarter (0.25x)": 0.25,
+    "Double (2x)": 2.0,
+    "Quad (4x)": 4.0,
+    "Custom": None,
+}
 
 
-SCALE_PRESET_OPTIONS = [
-    "Source (1x)",
-    "Half (0.5x)",
-    "Quarter (0.25x)",
-    "Double (2x)",
-    "Quad (4x)",
-    "Custom",
-]
+def get_scale_values(scale_preset: str, custom_h: float, custom_v: float) -> tuple[float, float]:
+    """Return (horizontal, vertical) factors for a preset name; "Custom" uses the inputs."""
+    factor = SCALE_PRESETS.get(scale_preset)
+    return (custom_h, custom_v) if factor is None else (factor, factor)
+
+
+def resize(image: torch.Tensor, h_scale: float, v_scale: float) -> torch.Tensor:
+    """Bilinearly resize a ComfyUI IMAGE batch (B, H, W, C)."""
+    if h_scale == 1.0 and v_scale == 1.0:
+        return image
+    _, height, width, _ = image.shape
+    size = (max(1, int(height * v_scale)), max(1, int(width * h_scale)))
+    resized = F.interpolate(
+        image.permute(0, 3, 1, 2), size=size, mode="bilinear", align_corners=False
+    )
+    return resized.permute(0, 2, 3, 1).clamp(0.0, 1.0)
 
 
 class NtscRsScaleNode(io.ComfyNode):
@@ -43,7 +53,7 @@ class NtscRsScaleNode(io.ComfyNode):
                 io.Combo.Input(
                     "scale_preset",
                     display_name="Scale Preset",
-                    options=SCALE_PRESET_OPTIONS,
+                    options=list(SCALE_PRESETS),
                     default="Source (1x)",
                     tooltip="Output resolution preset",
                 ),
@@ -54,7 +64,7 @@ class NtscRsScaleNode(io.ComfyNode):
                     min=0.125,
                     max=8.0,
                     step=0.125,
-                    tooltip="Horizontal scale factor",
+                    tooltip="Horizontal scale factor (Custom preset)",
                 ),
                 io.Float.Input(
                     "vertical_scale",
@@ -63,120 +73,15 @@ class NtscRsScaleNode(io.ComfyNode):
                     min=0.125,
                     max=8.0,
                     step=0.125,
-                    tooltip="Vertical scale factor",
-                ),
-                io.Boolean.Input(
-                    "scale_with_video_size",
-                    display_name="Scale With Video Size",
-                    default=False,
-                    tooltip="Multiply scale by video height",
+                    tooltip="Vertical scale factor (Custom preset)",
                 ),
             ],
             outputs=[
                 io.Image.Output(display_name="Image", tooltip="Rescaled image"),
             ],
-            is_output_node=False,
-            is_experimental=False,
-            is_deprecated=False,
-            is_dev_only=False,
-            is_api_node=False,
-            is_input_list=False,
-            not_idempotent=False,
-            accept_all_inputs=False,
-            enable_expand=True,
-            search_aliases=["ntsc", "scale", "resolution", "size", "resize"],
         )
 
     @classmethod
-    def get_scale_values(cls, scale_preset: str, custom_h: float, custom_v: float):
-        """Get horizontal and vertical scale values based on preset selection."""
-        if scale_preset == "Source (1x)":
-            return 1.0, 1.0
-        elif scale_preset == "Half (0.5x)":
-            return 0.5, 0.5
-        elif scale_preset == "Quarter (0.25x)":
-            return 0.25, 0.25
-        elif scale_preset == "Double (2x)":
-            return 2.0, 2.0
-        elif scale_preset == "Quad (4x)":
-            return 4.0, 4.0
-        else:  # Custom
-            return custom_h, custom_v
-
-    @classmethod
-    def process(cls, image, scale_preset, horizontal_scale, vertical_scale, scale_with_video_size):
-        """Process the image through NTSC scaling (actual resize)."""
-        try:
-            import comfyui_ntsc_rs
-
-            HAS_RUST = True
-        except ImportError:
-            HAS_RUST = False
-
-        if not HAS_RUST:
-            raise ImportError("comfyui_ntsc_rs native module not found.")
-
-        h_scale, v_scale = cls.get_scale_values(scale_preset, horizontal_scale, vertical_scale)
-
-        params = {
-            "filter_type": "Butterworth",
-            "input_luma_filter": "Notch",
-            "chroma_lowpass_in": "Full",
-            "chroma_demodulation": "Notch",
-            "chroma_lowpass_out": "Full",
-            "luma_smear": 0.5,
-            "composite_sharpening": 1.0,
-            "chroma_vert_blend": True,
-            "use_field": "Both",
-            "video_scanline_phase_shift": "Degrees180",
-            "video_scanline_phase_shift_offset": 0,
-            "head_switching_enabled": False,
-            "tracking_noise_enabled": False,
-            "composite_noise_enabled": False,
-            "luma_noise_enabled": False,
-            "chroma_noise_enabled": False,
-            "ringing_enabled": False,
-            "vhs_enabled": False,
-            "snow_intensity": 0.0,
-            "chroma_phase_noise_intensity": 0.0,
-            "chroma_phase_error": 0.0,
-            "chroma_delay_horizontal": 0.0,
-            "chroma_delay_vertical": 0,
-            "scale_enabled": False,
-            "random_seed": 0,
-        }
-
-        batch_size, height, width, channels = image.shape
-        results = []
-
-        for i in range(batch_size):
-            img = image[i]
-            img_np = (img.cpu().numpy() * 255.0).astype(np.uint8)
-
-            result = comfyui_ntsc_rs.apply_ntsc_filter(img_np, params)
-            result_float = torch.from_numpy(result).float() / 255.0
-
-            if h_scale != 1.0 or v_scale != 1.0:
-                new_height = int(height * v_scale)
-                new_width = int(width * h_scale)
-
-                result_float = result_float.permute(2, 0, 1)
-                result_float = result_float.unsqueeze(0)
-                result_float = F.interpolate(
-                    result_float, size=(new_height, new_width), mode="bilinear", align_corners=False
-                )
-                result_float = result_float.squeeze(0).permute(1, 2, 0)
-
-            result_float = torch.clamp(result_float, 0.0, 1.0)
-            results.append(result_float)
-
-        output = torch.stack(results, dim=0)
-        return io.NodeOutput(output)
-
-    @classmethod
-    async def execute(
-        cls, image, scale_preset, horizontal_scale, vertical_scale, scale_with_video_size
-    ):
-        return cls.process(
-            image, scale_preset, horizontal_scale, vertical_scale, scale_with_video_size
-        )
+    def execute(cls, image, scale_preset, horizontal_scale, vertical_scale):
+        h_scale, v_scale = get_scale_values(scale_preset, horizontal_scale, vertical_scale)
+        return io.NodeOutput(resize(image, h_scale, v_scale))

@@ -4,14 +4,9 @@ Applies signal processing effects: filter type, luma/chroma filters, smear, shar
 Part of the chainable NTSC-RS node system.
 """
 
-import numpy as np
-import torch
+from comfy_api.latest import io
 
-try:
-    from comfy_api.latest import io
-except ImportError:
-    from comfy import io
-
+from .native import apply_ntsc
 
 FILTER_TYPE_OPTIONS = ["ConstantK", "Butterworth"]
 LUMA_LOWPASS_OPTIONS = ["None", "Box", "Notch"]
@@ -94,20 +89,10 @@ class NtscRsSignalNode(io.ComfyNode):
             outputs=[
                 io.Image.Output(display_name="Image", tooltip="Processed image"),
             ],
-            is_output_node=False,
-            is_experimental=False,
-            is_deprecated=False,
-            is_dev_only=False,
-            is_api_node=False,
-            is_input_list=False,
-            not_idempotent=False,
-            accept_all_inputs=False,
-            enable_expand=True,
-            search_aliases=["ntsc", "signal", "filter", "luma", "chroma"],
         )
 
     @classmethod
-    def process(
+    def execute(
         cls,
         image,
         filter_type,
@@ -120,16 +105,6 @@ class NtscRsSignalNode(io.ComfyNode):
         chroma_vert_blend,
     ):
         """Process the image through NTSC signal effects."""
-        try:
-            import comfyui_ntsc_rs
-
-            HAS_RUST = True
-        except ImportError:
-            HAS_RUST = False
-
-        if not HAS_RUST:
-            raise ImportError("comfyui_ntsc_rs native module not found.")
-
         params = {
             "filter_type": filter_type,
             "input_luma_filter": input_luma_filter,
@@ -160,41 +135,4 @@ class NtscRsSignalNode(io.ComfyNode):
             "random_seed": 0,
         }
 
-        batch_size, height, width, channels = image.shape
-        results = []
-
-        for i in range(batch_size):
-            img = image[i]
-            img_np = (img.cpu().numpy() * 255.0).astype(np.uint8)
-            result = comfyui_ntsc_rs.apply_ntsc_filter(img_np, params)
-            result_float = torch.from_numpy(result).float() / 255.0
-            result_float = torch.clamp(result_float, 0.0, 1.0)
-            results.append(result_float)
-
-        output = torch.stack(results, dim=0)
-        return io.NodeOutput(output)
-
-    @classmethod
-    async def execute(
-        cls,
-        image,
-        filter_type,
-        input_luma_filter,
-        chroma_lowpass_in,
-        chroma_demodulation,
-        chroma_lowpass_out,
-        luma_smear,
-        composite_sharpening,
-        chroma_vert_blend,
-    ):
-        return cls.process(
-            image,
-            filter_type,
-            input_luma_filter,
-            chroma_lowpass_in,
-            chroma_demodulation,
-            chroma_lowpass_out,
-            luma_smear,
-            composite_sharpening,
-            chroma_vert_blend,
-        )
+        return io.NodeOutput(apply_ntsc(image, params))

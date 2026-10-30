@@ -51,3 +51,6 @@ test-results/
 
 # Logs
 *.log
+
+# Native binaries placed by build_node.py or downloaded from releases
+native/

@@ -4,14 +4,9 @@ Applies VHS-specific effects: tape speed, chroma loss, sharpen, edge wave.
 Part of the chainable NTSC-RS node system.
 """
 
-import numpy as np
-import torch
+from comfy_api.latest import io
 
-try:
-    from comfy_api.latest import io
-except ImportError:
-    from comfy import io
-
+from .native import apply_ntsc
 
 VHS_TAPE_SPEED_OPTIONS = ["NONE", "SP", "LP", "EP"]
 
@@ -123,20 +118,10 @@ class NtscRsVHSNode(io.ComfyNode):
             outputs=[
                 io.Image.Output(tooltip="Processed image"),
             ],
-            is_output_node=False,
-            is_experimental=False,
-            is_deprecated=False,
-            is_dev_only=False,
-            is_api_node=False,
-            is_input_list=False,
-            not_idempotent=False,
-            accept_all_inputs=False,
-            enable_expand=True,
-            search_aliases=["ntsc", "vhs", "tape", "chroma", "sharpen", "edge", "wave"],
         )
 
     @classmethod
-    def process(
+    def execute(
         cls,
         image,
         vhs_tape_speed,
@@ -152,25 +137,16 @@ class NtscRsVHSNode(io.ComfyNode):
         random_seed,
     ):
         """Process the image through NTSC VHS effects."""
-        try:
-            import comfyui_ntsc_rs
-
-            HAS_RUST = True
-        except ImportError:
-            HAS_RUST = False
-
-        if not HAS_RUST:
-            raise ImportError("comfyui_ntsc_rs native module not found.")
-
         params = {
-            # Disable signal processing
+            # Neutral signal stage: the Signal node owns these. Re-applying ntsc-rs defaults
+            # here compounded pre-emphasis on every chained pass (strong colour shift).
             "filter_type": "Butterworth",
-            "input_luma_filter": "Notch",
-            "chroma_lowpass_in": "Full",
+            "input_luma_filter": "None",
+            "chroma_lowpass_in": "None",
             "chroma_demodulation": "Notch",
-            "chroma_lowpass_out": "Full",
-            "luma_smear": 0.5,
-            "composite_sharpening": 1.0,
+            "chroma_lowpass_out": "None",
+            "luma_smear": 0.0,
+            "composite_sharpening": 0.0,
             "chroma_vert_blend": True,
             "use_field": "InterleavedUpper",
             "video_scanline_phase_shift": "Degrees180",
@@ -206,47 +182,4 @@ class NtscRsVHSNode(io.ComfyNode):
             "random_seed": random_seed,
         }
 
-        batch_size, height, width, channels = image.shape
-        results = []
-
-        for i in range(batch_size):
-            img = image[i]
-            img_np = (img.cpu().numpy() * 255.0).astype(np.uint8)
-            result = comfyui_ntsc_rs.apply_ntsc_filter(img_np, params)
-            result_float = torch.from_numpy(result).float() / 255.0
-            result_float = torch.clamp(result_float, 0.0, 1.0)
-            results.append(result_float)
-
-        output = torch.stack(results, dim=0)
-        return io.NodeOutput(output)
-
-    @classmethod
-    async def execute(
-        cls,
-        image,
-        vhs_tape_speed,
-        vhs_chroma_loss,
-        vhs_sharpen_enabled,
-        vhs_sharpen_intensity,
-        vhs_sharpen_frequency,
-        vhs_edge_wave_enabled,
-        vhs_edge_wave_intensity,
-        vhs_edge_wave_speed,
-        vhs_edge_wave_frequency,
-        vhs_edge_wave_detail,
-        random_seed,
-    ):
-        return cls.process(
-            image,
-            vhs_tape_speed,
-            vhs_chroma_loss,
-            vhs_sharpen_enabled,
-            vhs_sharpen_intensity,
-            vhs_sharpen_frequency,
-            vhs_edge_wave_enabled,
-            vhs_edge_wave_intensity,
-            vhs_edge_wave_speed,
-            vhs_edge_wave_frequency,
-            vhs_edge_wave_detail,
-            random_seed,
-        )
+        return io.NodeOutput(apply_ntsc(image, params))

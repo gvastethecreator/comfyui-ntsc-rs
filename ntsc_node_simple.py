@@ -4,14 +4,9 @@ This node provides quick access to common VHS/CRT looks using presets.
 For full control over all parameters, use NtscRsNode instead.
 """
 
-import numpy as np
-import torch
+from comfy_api.latest import io
 
-try:
-    from comfy_api.latest import io
-except ImportError:
-    from comfy import io
-
+from .native import apply_ntsc
 from .ntsc_presets import apply_intensity_to_preset, get_preset, get_preset_names
 
 
@@ -67,63 +62,15 @@ class NtscRsSimpleNode(io.ComfyNode):
             outputs=[
                 io.Image.Output(display_name="Image", tooltip="Processed image"),
             ],
-            is_output_node=False,
-            is_experimental=False,
-            is_deprecated=False,
-            is_dev_only=False,
-            is_api_node=False,
-            is_input_list=False,
-            not_idempotent=False,
-            accept_all_inputs=False,
-            enable_expand=True,
-            search_aliases=["ntsc", "vhs", "crt", "retro"],
         )
 
     @classmethod
-    def process(cls, image, preset, intensity, saturation, random_seed):
-        """Process the image through the NTSC effect."""
-        try:
-            import comfyui_ntsc_rs
-
-            HAS_RUST = True
-        except ImportError:
-            HAS_RUST = False
-
-        if not HAS_RUST:
-            raise ImportError(
-                "comfyui_ntsc_rs native module not found. "
-                "Run 'python build_node.py' to build the Rust binding."
-            )
-
-        batch_size, height, width, channels = image.shape
-        results = []
-
+    def execute(cls, image, preset, intensity, saturation, random_seed):
         preset_config = get_preset(preset)
         preset_config["random_seed"] = random_seed
         preset_config["composite_sharpening"] = preset_config.get("composite_sharpening", 1.0) * (
             1.0 + saturation
         )
-
-        for i in range(batch_size):
-            img = image[i]
-
-            if intensity < 1.0:
-                current_preset = apply_intensity_to_preset(preset_config, intensity)
-            else:
-                current_preset = preset_config.copy()
-
-            img_np = (img.cpu().numpy() * 255.0).astype(np.uint8)
-
-            result = comfyui_ntsc_rs.apply_ntsc_filter(img_np, current_preset)
-
-            result_float = torch.from_numpy(result).float() / 255.0
-            result_float = torch.clamp(result_float, 0.0, 1.0)
-
-            results.append(result_float)
-
-        output = torch.stack(results, dim=0)
-        return io.NodeOutput(output)
-
-    @classmethod
-    async def execute(cls, image, preset, intensity, saturation, random_seed):
-        return cls.process(image, preset, intensity, saturation, random_seed)
+        if intensity < 1.0:
+            preset_config = apply_intensity_to_preset(preset_config, intensity)
+        return io.NodeOutput(apply_ntsc(image, preset_config))

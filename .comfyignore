@@ -1,0 +1,4 @@
+# Left out of the Comfy Registry package (see [tool.comfy] in pyproject.toml).
+docs/
+.github/
+.vscode/

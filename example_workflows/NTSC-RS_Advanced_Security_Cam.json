@@ -1,0 +1,213 @@
+{
+  "id": "8a129cb2-4e32-5838-bf59-9b8bced7c677",
+  "revision": 0,
+  "last_node_id": 3,
+  "last_link_id": 2,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [
+        40,
+        80
+      ],
+      "size": [
+        340,
+        132
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null,
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "example.png",
+        "image"
+      ]
+    },
+    {
+      "id": 2,
+      "type": "NtscRs_Advanced",
+      "pos": [
+        430,
+        80
+      ],
+      "size": [
+        340,
+        1700
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Image",
+          "type": "IMAGE",
+          "links": [
+            2
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "NtscRs_Advanced"
+      },
+      "widgets_values": [
+        "Butterworth",
+        "Notch",
+        "Full",
+        "Notch",
+        "Full",
+        0.5,
+        1.0,
+        true,
+        "InterleavedUpper",
+        "Degrees180",
+        0,
+        true,
+        8,
+        3,
+        72.0,
+        true,
+        0.95,
+        0.03,
+        true,
+        40,
+        15.0,
+        0.025,
+        0.25,
+        0.25,
+        true,
+        0.05,
+        0.5,
+        1,
+        true,
+        0.01,
+        0.5,
+        1,
+        true,
+        0.1,
+        0.05,
+        2,
+        true,
+        0.45,
+        4.0,
+        4.0,
+        true,
+        "EP",
+        2.5e-05,
+        true,
+        0.25,
+        1.0,
+        true,
+        0.5,
+        4.0,
+        0.05,
+        2,
+        0.002,
+        0.5,
+        0.001,
+        0.1,
+        0.0,
+        0,
+        true,
+        1.0,
+        1.0,
+        false,
+        23,
+        0
+      ]
+    },
+    {
+      "id": 3,
+      "type": "SaveImage",
+      "pos": [
+        820,
+        80
+      ],
+      "size": [
+        420,
+        300
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": null,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "ntsc-rs/NTSC-RS_Advanced_Security_Cam"
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      2,
+      0,
+      "IMAGE"
+    ],
+    [
+      2,
+      2,
+      0,
+      3,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.8,
+      "offset": [
+        0,
+        0
+      ]
+    }
+  },
+  "version": 0.4
+}

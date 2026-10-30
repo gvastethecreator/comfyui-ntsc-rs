@@ -20,7 +20,8 @@
       </a>
       <nav aria-label="Primary navigation">
         <a href="#signals">Signals</a>
-        <a href="#nodes">Nodes</a>
+        <a href="#examples">Examples</a>
+        <a href="#reference">Nodes</a>
         <a href="#install">Install</a>
         <a href="https://github.com/gvastethecreator/comfyui-ntsc-rs">GitHub</a>
       </nav>
@@ -37,7 +38,7 @@
             leaving your ComfyUI graph.
           </p>
           <div class="actions">
-            <a class="button button-primary" href="#install">Install from source</a>
+            <a class="button button-primary" href="#install">Install</a>
             <a class="button" href="https://github.com/gvastethecreator/comfyui-ntsc-rs">View code</a>
           </div>
           <dl class="stats" aria-label="Project summary">
@@ -109,6 +110,239 @@
         </div>
       </section>
 
+      <section class="signal-gallery examples" id="examples" aria-labelledby="examples-title">
+        <div class="section-heading">
+          <p class="eyebrow">Example workflows</p>
+          <h2 id="examples-title">Four graphs, ready to load.</h2>
+          <p>Each image is the real output of its workflow, run in ComfyUI 0.43 with seed 23. In ComfyUI open <em>Templates → comfyui-ntsc-rs</em>, or drop a JSON file onto the canvas.</p>
+        </div>
+        <div class="gallery-grid examples-grid">
+          <figure>
+            <img src="assets/examples/NTSC-RS_Simple_VHS.webp" width="1200" height="800" loading="lazy" decoding="async" alt="Still life after the Simple node with the VHS Classic preset" />
+            <figcaption><strong>Simple · VHS Classic</strong><span>Load Image → Simple → Save</span><a href="https://raw.githubusercontent.com/gvastethecreator/comfyui-ntsc-rs/main/example_workflows/NTSC-RS_Simple_VHS.json" download>Workflow JSON</a></figcaption>
+          </figure>
+          <figure>
+            <img src="assets/examples/NTSC-RS_Intermediate_CRT.webp" width="1200" height="800" loading="lazy" decoding="async" alt="Still life after the Intermediate node with the CRT TV preset" />
+            <figcaption><strong>Intermediate · CRT TV</strong><span>Load Image → Intermediate → Save</span><a href="https://raw.githubusercontent.com/gvastethecreator/comfyui-ntsc-rs/main/example_workflows/NTSC-RS_Intermediate_CRT.json" download>Workflow JSON</a></figcaption>
+          </figure>
+          <figure>
+            <img src="assets/examples/NTSC-RS_Chain_Worn_Tape.webp" width="1200" height="800" loading="lazy" decoding="async" alt="Still life after chaining the Signal, Artifacts, Noise and VHS nodes" />
+            <figcaption><strong>Chain · worn tape</strong><span>Signal → Artifacts → Noise → VHS</span><a href="https://raw.githubusercontent.com/gvastethecreator/comfyui-ntsc-rs/main/example_workflows/NTSC-RS_Chain_Worn_Tape.json" download>Workflow JSON</a></figcaption>
+          </figure>
+          <figure>
+            <img src="assets/examples/NTSC-RS_Advanced_Security_Cam.webp" width="1200" height="800" loading="lazy" decoding="async" alt="Still life after the Advanced node with EP tape speed, snow and chroma phase error" />
+            <figcaption><strong>Advanced · security cam</strong><span>EP tape, snow, phase error</span><a href="https://raw.githubusercontent.com/gvastethecreator/comfyui-ntsc-rs/main/example_workflows/NTSC-RS_Advanced_Security_Cam.json" download>Workflow JSON</a></figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="reference" id="reference" aria-labelledby="reference-title">
+        <div class="section-heading">
+          <p class="eyebrow">Node reference</p>
+          <h2 id="reference-title">Every node, every input.</h2>
+          <p>All nodes take and return a ComfyUI <code>IMAGE</code> batch and live in the <code>NTSC</code> category.</p>
+        </div>
+        <div class="reference-list">
+          <details>
+            <summary><strong>NTSC-RS Simple</strong><code>NtscRs_Simple</code><span>4 inputs</span></summary>
+            <p>VHS/CRT effect with preset configurations. For full parameter control, use the Advanced node.</p>
+            <ul>
+              <li>Preset <span>vhs_classic / vhs_worn / vhs_pro / crt_tv / crt_pvm / clean_ntsc …</span></li>
+              <li>Intensity <span>0.0–1.0, default 1.0</span></li>
+              <li>Saturation <span>-1.0–2.0, default 0.25</span></li>
+              <li>Seed <span>-2147483648–2147483647, default 0</span></li>
+            </ul>
+          </details>
+          <details>
+            <summary><strong>NTSC-RS Intermediate</strong><code>NtscRs_Intermediate</code><span>7 inputs</span></summary>
+            <p>VHS/CRT effect with preset configurations and scaling controls. Balance between simplicity and full parameter control.</p>
+            <ul>
+              <li>Preset <span>vhs_classic / vhs_worn / vhs_pro / crt_tv / crt_pvm / clean_ntsc …</span></li>
+              <li>Intensity <span>0.0–1.0, default 1.0</span></li>
+              <li>Scale Preset <span>Source (1x) / Half (0.5x) / Quarter (0.25x) / Double (2x) / Custom</span></li>
+              <li>H Scale <span>0.125–8.0, default 1.0</span></li>
+              <li>V Scale <span>0.125–8.0, default 1.0</span></li>
+              <li>Field Mode <span>InterleavedUpper / InterleavedLower / Both / Alternating</span></li>
+              <li>Seed <span>-2147483648–2147483647, default 0</span></li>
+            </ul>
+          </details>
+          <details>
+            <summary><strong>NTSC-RS Advanced</strong><code>NtscRs_Advanced</code><span>63 inputs</span></summary>
+            <p>Full NTSC/VHS/CRT effect with complete parameter control. 1:1 quality with ntsc-rs library.</p>
+            <ul>
+              <li>Filter Type <span>ConstantK / Butterworth</span></li>
+              <li>Luma Filter <span>None / Box / Notch</span></li>
+              <li>Chroma Lowpass In <span>None / Light / Full</span></li>
+              <li>Chroma Demodulation <span>Box / Notch / OneLineComb / TwoLineComb</span></li>
+              <li>Chroma Lowpass Out <span>None / Light / Full</span></li>
+              <li>Luma Smear <span>0.0–1.0, default 0.5</span></li>
+              <li>Sharpening <span>-1.0–2.0, default 1.0</span></li>
+              <li>Chroma Vert Blend <span>default true</span></li>
+              <li>Field Mode <span>Alternating / Upper / Lower / Both / InterleavedUpper / InterleavedLower</span></li>
+              <li>Scanline Phase <span>Degrees0 / Degrees90 / Degrees180 / Degrees270</span></li>
+              <li>Phase Offset <span>0–3, default 0</span></li>
+              <li>Head Switching On <span>default true</span></li>
+              <li>Head Height <span>0–24, default 8</span></li>
+              <li>Head Offset <span>0–24, default 3</span></li>
+              <li>Horizontal Shift <span>-100.0–100.0, default 72.0</span></li>
+              <li>Mid Line On <span>default true</span></li>
+              <li>Mid Line Pos <span>0.0–1.0, default 0.95</span></li>
+              <li>Mid Line Jitter <span>0.0–1.0, default 0.03</span></li>
+              <li>Tracking Noise On <span>default true</span></li>
+              <li>Tracking Height <span>0–120, default 12</span></li>
+              <li>Wave Intensity <span>-50.0–50.0, default 15.0</span></li>
+              <li>Snow Intensity <span>0.0–1.0, default 0.025</span></li>
+              <li>Snow Anisotropy <span>0.0–1.0, default 0.25</span></li>
+              <li>Noise Intensity <span>0.0–1.0, default 0.25</span></li>
+              <li>Composite Noise On <span>default true</span></li>
+              <li>Composite Intensity <span>0.0–1.0, default 0.05</span></li>
+              <li>Composite Frequency <span>0.0–1.0, default 0.5</span></li>
+              <li>Composite Detail <span>1–5, default 1</span></li>
+              <li>Luma Noise On <span>default true</span></li>
+              <li>Luma Intensity <span>0.0–1.0, default 0.01</span></li>
+              <li>Luma Frequency <span>0.0–1.0, default 0.5</span></li>
+              <li>Luma Detail <span>1–5, default 1</span></li>
+              <li>Chroma Noise On <span>default true</span></li>
+              <li>Chroma Intensity <span>0.0–1.0, default 0.1</span></li>
+              <li>Chroma Frequency <span>0.0–0.5, default 0.05</span></li>
+              <li>Chroma Detail <span>1–5, default 2</span></li>
+              <li>Ringing On <span>default true</span></li>
+              <li>Ringing Freq <span>0.0–1.0, default 0.45</span></li>
+              <li>Ringing Power <span>1.0–10.0, default 4.0</span></li>
+              <li>Ringing Intensity <span>0.0–10.0, default 4.0</span></li>
+              <li>VHS On <span>default true</span></li>
+              <li>Tape Speed <span>NONE / SP / LP / EP</span></li>
+              <li>Chroma Loss <span>0.0–1.0, default 2.5e-05</span></li>
+              <li>Sharpen On <span>default true</span></li>
+              <li>Sharpen Intensity <span>0.0–5.0, default 0.25</span></li>
+              <li>Sharpen Freq <span>0.5–4.0, default 1.0</span></li>
+              <li>Edge Wave On <span>default true</span></li>
+              <li>Edge Intensity <span>0.0–20.0, default 0.5</span></li>
+              <li>Edge Speed <span>0.0–10.0, default 4.0</span></li>
+              <li>Edge Freq <span>0.0–0.5, default 0.05</span></li>
+              <li>Edge Detail <span>1–5, default 2</span></li>
+              <li>Snow Intensity <span>0.0–100.0, default 0.00025</span></li>
+              <li>Snow Anisotropy <span>0.0–1.0, default 0.5</span></li>
+              <li>Phase Noise <span>0.0–1.0, default 0.001</span></li>
+              <li>Phase Error <span>0.0–1.0, default 0.0</span></li>
+              <li>H Chroma Delay <span>-40.0–40.0, default 0.0</span></li>
+              <li>V Chroma Delay <span>-20–20, default 0</span></li>
+              <li>Scale On <span>default true</span></li>
+              <li>H Scale <span>0.125–8.0, default 1.0</span></li>
+              <li>V Scale <span>0.125–8.0, default 1.0</span></li>
+              <li>Scale With Size <span>default false</span></li>
+              <li>Seed <span>-2147483648–2147483647, default 0</span></li>
+              <li>Frame Num <span>0–2147483647, default 0</span></li>
+            </ul>
+          </details>
+          <details>
+            <summary><strong>NTSC-RS Signal</strong><code>NtscRs_Signal</code><span>8 inputs</span></summary>
+            <p>Signal processing: filter type, luma/chroma filters, smear, and sharpening. Chain after other NTSC category nodes.</p>
+            <ul>
+              <li>Filter Type <span>ConstantK / Butterworth</span></li>
+              <li>Luma Filter <span>None / Box / Notch</span></li>
+              <li>Chroma Lowpass In <span>None / Light / Full</span></li>
+              <li>Chroma Demodulation <span>Box / Notch / OneLineComb / TwoLineComb</span></li>
+              <li>Chroma Lowpass Out <span>None / Light / Full</span></li>
+              <li>Luma Smear <span>0.0–1.0, default 0.5</span></li>
+              <li>Sharpening <span>-1.0–2.0, default 1.0</span></li>
+              <li>Chroma Vert Blend <span>default true</span></li>
+            </ul>
+          </details>
+          <details>
+            <summary><strong>NTSC-RS Scanlines</strong><code>NtscRs_Scanlines</code><span>3 inputs</span></summary>
+            <p>Field and scanline processing: field mode and scanline phase shift. Chain after other NTSC category nodes.</p>
+            <ul>
+              <li>Use Field <span>Alternating / Upper / Lower / Both / InterleavedUpper / InterleavedLower</span></li>
+              <li>Video Scanline Phase Shift <span>Degrees0 / Degrees90 / Degrees180 / Degrees270</span></li>
+              <li>Phase Shift Offset <span>0–3, default 0</span></li>
+            </ul>
+          </details>
+          <details>
+            <summary><strong>NTSC-RS Artifacts</strong><code>NtscRs_Artifacts</code><span>14 inputs</span></summary>
+            <p>VHS artifacts: head switching and tracking noise emulation. Chain after other NTSC category nodes.</p>
+            <ul>
+              <li>Head Switching <span>default true</span></li>
+              <li>Head Switching Height <span>0–24, default 8</span></li>
+              <li>Head Switching Offset <span>0–24, default 3</span></li>
+              <li>Head Switching H Shift <span>-100.0–100.0, default 72.0</span></li>
+              <li>Mid Line Enabled <span>default true</span></li>
+              <li>Mid Line Position <span>0.0–1.0, default 0.95</span></li>
+              <li>Mid Line Jitter <span>0.0–1.0, default 0.03</span></li>
+              <li>Tracking Noise <span>default true</span></li>
+              <li>Tracking Noise Height <span>0–120, default 12</span></li>
+              <li>Tracking Wave Intensity <span>-50.0–50.0, default 15.0</span></li>
+              <li>Tracking Snow Intensity <span>0.0–1.0, default 0.025</span></li>
+              <li>Tracking Snow Anisotropy <span>0.0–1.0, default 0.25</span></li>
+              <li>Tracking Noise Intensity <span>0.0–1.0, default 0.25</span></li>
+              <li>Seed <span>-2147483648–2147483647, default 0</span></li>
+            </ul>
+          </details>
+          <details>
+            <summary><strong>NTSC-RS Noise</strong><code>NtscRs_Noise</code><span>17 inputs</span></summary>
+            <p>Noise effects: composite, luma, and chroma noise. Chain after other NTSC category nodes.</p>
+            <ul>
+              <li>Composite Noise <span>default true</span></li>
+              <li>Composite Intensity <span>0.0–1.0, default 0.05</span></li>
+              <li>Composite Frequency <span>0.0–1.0, default 0.5</span></li>
+              <li>Composite Detail <span>1–5, default 1</span></li>
+              <li>Luma Noise <span>default true</span></li>
+              <li>Luma Intensity <span>0.0–1.0, default 0.01</span></li>
+              <li>Luma Frequency <span>0.0–1.0, default 0.5</span></li>
+              <li>Luma Detail <span>1–5, default 1</span></li>
+              <li>Chroma Noise <span>default true</span></li>
+              <li>Chroma Intensity <span>0.0–1.0, default 0.1</span></li>
+              <li>Chroma Frequency <span>0.0–0.5, default 0.05</span></li>
+              <li>Chroma Detail <span>1–5, default 2</span></li>
+              <li>Ringing <span>default true</span></li>
+              <li>Ringing Frequency <span>0.0–1.0, default 0.45</span></li>
+              <li>Ringing Power <span>1.0–10.0, default 4.0</span></li>
+              <li>Ringing Intensity <span>0.0–10.0, default 4.0</span></li>
+              <li>Seed <span>-2147483648–2147483647, default 0</span></li>
+            </ul>
+          </details>
+          <details>
+            <summary><strong>NTSC-RS VHS</strong><code>NtscRs_VHS</code><span>11 inputs</span></summary>
+            <p>VHS-specific effects: tape speed, chroma loss, sharpening, edge wave. Chain after other NTSC category nodes.</p>
+            <ul>
+              <li>VHS Tape Speed <span>NONE / SP / LP / EP</span></li>
+              <li>VHS Chroma Loss <span>0.0–1.0, default 2.5e-05</span></li>
+              <li>VHS Sharpen <span>default true</span></li>
+              <li>Sharpen Intensity <span>0.0–5.0, default 0.25</span></li>
+              <li>Sharpen Frequency <span>0.5–4.0, default 1.0</span></li>
+              <li>Edge Wave <span>default true</span></li>
+              <li>Edge Wave Intensity <span>0.0–20.0, default 0.5</span></li>
+              <li>Edge Wave Speed <span>0.0–10.0, default 4.0</span></li>
+              <li>Edge Wave Frequency <span>0.0–0.5, default 0.05</span></li>
+              <li>Edge Wave Detail <span>1–5, default 2</span></li>
+              <li>Seed <span>-2147483648–2147483647, default 0</span></li>
+            </ul>
+          </details>
+          <details>
+            <summary><strong>NTSC-RS Global</strong><code>NtscRs_Global</code><span>7 inputs</span></summary>
+            <p>Global effects: snow speckles, chroma phase noise/error, chroma delay. Chain after other NTSC category nodes.</p>
+            <ul>
+              <li>Snow Intensity <span>0.0–100.0, default 0.00025</span></li>
+              <li>Snow Anisotropy <span>0.0–1.0, default 0.5</span></li>
+              <li>Chroma Phase Noise <span>0.0–1.0, default 0.001</span></li>
+              <li>Chroma Phase Error <span>0.0–1.0, default 0.0</span></li>
+              <li>Chroma Delay H <span>-40.0–40.0, default 0.0</span></li>
+              <li>Chroma Delay V <span>-20–20, default 0</span></li>
+              <li>Seed <span>-2147483648–2147483647, default 0</span></li>
+            </ul>
+          </details>
+          <details>
+            <summary><strong>NTSC-RS Scale</strong><code>NtscRs_Scale</code><span>3 inputs</span></summary>
+            <p>Resolution scaling: horizontal and vertical scale factors. Performs actual image resizing using PyTorch. Chain after other NTSC category nodes.</p>
+            <ul>
+              <li>Scale Preset <span>Source (1x) / Half (0.5x) / Quarter (0.25x) / Double (2x) / Quad (4x) / Custom</span></li>
+              <li>H Scale <span>0.125–8.0, default 1.0</span></li>
+              <li>V Scale <span>0.125–8.0, default 1.0</span></li>
+            </ul>
+          </details>
+        </div>
+      </section>
+
       <section class="pipeline" aria-labelledby="pipeline-title">
         <div>
           <p class="eyebrow">The working path</p>
@@ -124,14 +358,17 @@
 
       <section class="install" id="install" aria-labelledby="install-title">
         <div>
-          <p class="eyebrow">Python 3.12+ · Rust 1.89+</p>
-          <h2 id="install-title">Build for the Python that runs ComfyUI.</h2>
-          <p>The installer targets an explicit interpreter and never copies into a machine-specific folder unless you ask it to install.</p>
+          <p class="eyebrow">ComfyUI 0.3.48+ · Python 3.12+</p>
+          <h2 id="install-title">Install like any custom node.</h2>
+          <p>Use ComfyUI-Manager or the Comfy Registry, or clone into <code>custom_nodes</code>. On first start the node loads its prebuilt Rust binary for your OS, so no compiler is needed. Builds exist for Windows x64, Linux x64/arm64 and macOS arm64/x64.</p>
+          <p>No prebuilt binary for your platform? Install Rust and run <code>python build_node.py</code> with the Python that runs ComfyUI; the console prints the exact command.</p>
         </div>
-        <pre><code>git clone https://github.com/gvastethecreator/comfyui-ntsc-rs.git
-cd comfyui-ntsc-rs
-python -m pip install -r requirements.txt
-python build_node.py --install</code></pre>
+        <pre><code>cd ComfyUI/custom_nodes
+git clone https://github.com/gvastethecreator/comfyui-ntsc-rs.git
+# restart ComfyUI
+
+# or, with comfy-cli
+comfy node install comfyui-ntsc-rs</code></pre>
       </section>
     </main>
 

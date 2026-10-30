@@ -1,52 +1,215 @@
 {
-  "source_commit": "728a067b8d58e862e7a0ebef6c960e4eafa5bcca",
+  "schema_version": 2,
+  "source_commit": "e77ab9ba22b29a16c20dfe8a2bb91bc97ed1a040",
   "working_tree_dirty": true,
-  "generated_at": "2026-08-15T03:33:15Z",
-  "scanned_scope": [
-    "."
-  ],
-  "excluded_directories": [
-    ".cache",
-    ".git",
-    ".hg",
-    ".next",
-    ".nuxt",
-    ".scratch",
-    ".svn",
-    ".turbo",
-    ".venv",
-    "__pycache__",
-    "build",
-    "coverage",
-    "dist",
-    "docs/codemap",
-    "generated",
-    "node_modules",
-    "out",
-    "rust_binding/target",
-    "target",
-    "vendor",
-    "venv"
-  ],
-  "fingerprint_algorithm": "sha256-path-content-v1",
-  "modules": [
-    {
-      "id": ".",
-      "path": ".",
-      "file_count": 18,
-      "fingerprint": "1905aa19fa3b06ebe4650a9da68f09d533957d8e2abda3fa7c6375fe5fcf2548"
+  "generated_at": "2026-10-30T17:08:27Z",
+  "generation_id": "462c1c95fad6cf8bfb8ec966c84c11d40119cd8d24d92733ebc41ca0e00a4b45",
+  "analysis": {
+    "version": "syntax-1",
+    "digest": "ae6d608d107619ec3efae990b53b43e523c90e8f5d2c3e86ab86c9e8ec95d260"
+  },
+  "inventory": {
+    "policy": {
+      "inventory": "working-tree",
+      "scope": [
+        "."
+      ],
+      "exclude": [
+        ".agents",
+        ".cache",
+        ".git",
+        ".hg",
+        ".next",
+        ".nuxt",
+        ".obsidian",
+        ".scratch",
+        ".svn",
+        ".turbo",
+        ".venv",
+        ".vscode",
+        "__pycache__",
+        "build",
+        "coverage",
+        "dist",
+        "docs/codemap",
+        "generated",
+        "node_modules",
+        "out",
+        "target",
+        "vendor",
+        "venv"
+      ],
+      "config_digest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
     },
-    {
-      "id": "rust_binding",
-      "path": "rust_binding",
-      "file_count": 4,
-      "fingerprint": "34cbf26cfe5095271573eee6407f4ab3bcf838f96a040073ba0da1bb7ccea2d8"
-    },
-    {
-      "id": "wheels",
-      "path": "wheels",
-      "file_count": 1,
-      "fingerprint": "ee679f04810c1049414eeca8224775b0661a5ae86b2559abbde751066dde094c"
-    }
-  ]
+    "files": [
+      {
+        "path": "__init__.py",
+        "origin": "tracked",
+        "state": "present",
+        "digest": "51d0b4e3f9a7a92cac4a0b844d21ce0797772e45ce277cfdba5eec862236ecdc",
+        "size": 1923
+      },
+      {
+        "path": "build_node.py",
+        "origin": "tracked",
+        "state": "present",
+        "digest": "964a771a63e980d35f95f415e780ebe7edab90f766451fa41300d7279f0b7d9a",
+        "size": 6177
+      },
+      {
+        "path": "install.py",
+        "origin": "untracked",
+        "state": "present",
+        "digest": "3406b9159965b29de4bb31119a9831b77ef8b68d9478566f8396337aa364abbd",
+        "size": 172
+      },
+      {
+        "path": "native.py",
+        "origin": "untracked",
+        "state": "present",
+        "digest": "5eb445e1580f658ea5c6776443ae077f52fde26d7a64b71c952e379ca69c397b",
+        "size": 4351
+      },
+      {
+        "path": "ntsc_node.py",
+        "origin": "tracked",
+        "state": "present",
+        "digest": "07e0dbbce10044b442ee813f312914c83aeeb71bc6bfae590c9720e5dd3b913e",
+        "size": 21716
+      },
+      {
+        "path": "ntsc_node_artifacts.py",
+        "origin": "tracked",
+        "state": "present",
+        "digest": "0572b906ffa8985bd402b68807bcd849b007a71358051e564c6dcd47018dee6b",
+        "size": 8466
+      },
+      {
+        "path": "ntsc_node_global.py",
+        "origin": "tracked",
+        "state": "present",
+        "digest": "efc7ee33b39e8dd0d4879625c1aea960826274231eaa018dd9245f8954f70007",
+        "size": 5319
+      },
+      {
+        "path": "ntsc_node_intermediate.py",
+        "origin": "tracked",
+        "state": "present",
+        "digest": "2eae48673d1ba7f15cb686c1846de4a4db8af074fccd3a1841641934bfe6fe50",
+        "size": 4496
+      },
+      {
+        "path": "ntsc_node_noise.py",
+        "origin": "tracked",
+        "state": "present",
+        "digest": "2f5a54e2666986f77da01b284f15a2481bb69b8f591c56aab5890d1d72865f3a",
+        "size": 9097
+      },
+      {
+        "path": "ntsc_node_scale.py",
+        "origin": "tracked",
+        "state": "present",
+        "digest": "2a78d72e1ea4005827ef9d43ca3f2324199694896fc038a8da6a1d392e48f5af",
+        "size": 3230
+      },
+      {
+        "path": "ntsc_node_scanlines.py",
+        "origin": "tracked",
+        "state": "present",
+        "digest": "c033441a8ed883ba298875432c28a516c6aa6243b61e86135b242dc4a55cb0ea",
+        "size": 3837
+      },
+      {
+        "path": "ntsc_node_signal.py",
+        "origin": "tracked",
+        "state": "present",
+        "digest": "e259d4d1746c95fca588e18f8da5ff0f3d831bc602b4d24099d75ccaed525dae",
+        "size": 5259
+      },
+      {
+        "path": "ntsc_node_simple.py",
+        "origin": "tracked",
+        "state": "present",
+        "digest": "8cf9d4a74c7ccd10734125685c4ef2bb9abb6596b9edbfaca4231e7ac55ae3e0",
+        "size": 2850
+      },
+      {
+        "path": "ntsc_node_vhs.py",
+        "origin": "tracked",
+        "state": "present",
+        "digest": "bfea7e9e95b30cf18d236d65473b9b417492ede500ae3736a552b16ec12124a0",
+        "size": 7005
+      },
+      {
+        "path": "ntsc_presets.py",
+        "origin": "tracked",
+        "state": "present",
+        "digest": "37a73c157289d52ab4481042f686aef40c26142e95bf52161b7cef893703d500",
+        "size": 36820
+      },
+      {
+        "path": "pyproject.toml",
+        "origin": "tracked",
+        "state": "present",
+        "digest": "a4ead76eba200499fec16e243f14f26ca317630d007789c8f8a2a74e1f0d5c0f",
+        "size": 1808
+      },
+      {
+        "path": "requirements.txt",
+        "origin": "tracked",
+        "state": "present",
+        "digest": "a1bd2989ef047c62425808e7b1c4cc73425d48e76ea38f8cf4e0583a5f493785",
+        "size": 12
+      },
+      {
+        "path": "rust_binding/Cargo.toml",
+        "origin": "tracked",
+        "state": "present",
+        "digest": "f61e906c77e3cd820877e4809e06ea2d4bb42641d8bc8b69434c78d982cee3e9",
+        "size": 306
+      },
+      {
+        "path": "rust_binding/pyproject.toml",
+        "origin": "tracked",
+        "state": "present",
+        "digest": "c08e95f1418dd58c3faa28657fc6341cdc22759802e2cf20f26c81b898c7d4b0",
+        "size": 271
+      },
+      {
+        "path": "rust_binding/src/lib.rs",
+        "origin": "tracked",
+        "state": "present",
+        "digest": "9eb4f8498e6946d7841a218aedec9fa24c4cddbd8244612de3a50e3a460e688f",
+        "size": 12372
+      },
+      {
+        "path": "scripts/clean_generated.py",
+        "origin": "tracked",
+        "state": "present",
+        "digest": "332a1dc67b62f692bbafb7f539bed64e5044fb35932dcee08ec6e217f0754f25",
+        "size": 1072
+      },
+      {
+        "path": "scripts/native_smoke.py",
+        "origin": "tracked",
+        "state": "present",
+        "digest": "26c9dc073c5629c5cf5ca3908359d169a309a3d5271dea31a3ca3366abe7c230",
+        "size": 1625
+      },
+      {
+        "path": "scripts/verify.py",
+        "origin": "tracked",
+        "state": "present",
+        "digest": "9ef9df90093e44abb4d4cd08a0db6ae895cfa4d964ec0b509a78fe66aa22e741",
+        "size": 1865
+      }
+    ],
+    "digest": "29fa2060b7504449887c31ffe04cffd8daa30dd726277105a8a4013e9bbef7b4"
+  },
+  "source_digest": "a21420aed0a3e646f52727f160e8f1811c73501e44a9f833d3700da6fb1c3b3d",
+  "artifact_hashes": {
+    "codemap.json": "2498948458ce0e0e99d2bc8a72652b329ef0a20066a3cd6cc891bb8895ddb1db",
+    "codemap.md": "db1ecc0a4c43a75783429a22d6484ba3f0950f8f1b632c1c80973aeb997a8f92",
+    "codemap.html": "1f6f7d8ae4ca686d7cf82f09a41139ef0d9bd7d131406b3dcf87328af506b9f3"
+  }
 }

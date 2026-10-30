@@ -1,0 +1,121 @@
+name: Release
+
+# Builds one abi3 native binary per OS/architecture (Python 3.12+), smoke-tests it on
+# Python 3.12 and 3.13, and attaches wheels plus raw binaries to a draft GitHub release.
+# native.py downloads the raw binary named comfyui_ntsc_rs-<version>-<platform><ext>.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: windows-latest, target: x86_64-pc-windows-msvc, platform: win_amd64, ext: .pyd }
+          - { os: ubuntu-latest, target: x86_64-unknown-linux-gnu, platform: linux_x86_64, ext: .so }
+          - { os: ubuntu-latest, target: aarch64-unknown-linux-gnu, platform: linux_aarch64, ext: .so }
+          - { os: macos-latest, target: aarch64-apple-darwin, platform: macos_arm64, ext: .so }
+          - { os: macos-latest, target: x86_64-apple-darwin, platform: macos_x86_64, ext: .so }
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Build wheel
+        uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
+        with:
+          working-directory: rust_binding
+          target: ${{ matrix.target }}
+          manylinux: "2014"
+          args: --release --locked --out ../dist
+
+      - name: Extract raw binary for native.py
+        shell: python
+        run: |
+          import pathlib, tomllib, zipfile
+          version = tomllib.loads(pathlib.Path("pyproject.toml").read_text())["project"]["version"]
+          wheel = next(pathlib.Path("dist").glob("*.whl"))
+          with zipfile.ZipFile(wheel) as archive:
+              member = next(n for n in archive.namelist() if n.endswith((".pyd", ".so")))
+              target = pathlib.Path("dist") / f"comfyui_ntsc_rs-{version}-${{ matrix.platform }}${{ matrix.ext }}"
+              target.write_bytes(archive.read(member))
+          print(f"{wheel.name} -> {target.name}")
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: native-${{ matrix.platform }}
+          path: dist/*
+
+  smoke:
+    name: Smoke ${{ matrix.os }} / Python ${{ matrix.python }}
+    needs: build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        python: ["3.12", "3.13"]
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Download binaries
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: native-*
+          merge-multiple: true
+          path: native
+
+      - name: Load the binary the way the custom node does
+        run: |
+          python -m pip install numpy
+          python scripts/native_smoke.py
+
+  release:
+    name: Draft GitHub release
+    needs: smoke
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Require the tag to match pyproject.toml
+        run: |
+          version=$(python3 -c 'import tomllib;print(tomllib.load(open("pyproject.toml","rb"))["project"]["version"])')
+          test "v$version" = "$GITHUB_REF_NAME"
+
+      - name: Download binaries
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: native-*
+          merge-multiple: true
+          path: dist
+
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/* --draft --generate-notes --title "$GITHUB_REF_NAME"

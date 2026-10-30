@@ -1,14 +1,15 @@
 [package]
 name = "comfyui_ntsc_rs"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
+license = "MIT"
 
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = { version = "0.29.2", features = ["extension-module"] }
-numpy = "0.29.0"
+pyo3 = { version = "0.30.1", features = ["abi3-py312"] }
+numpy = "0.30.0"
 ntsc-rs = { path = "vendor/ntscrs" }
 
 [profile.release]

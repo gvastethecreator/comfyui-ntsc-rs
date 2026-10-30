@@ -1,42 +1,41 @@
-[build-system]
-requires = ["maturin>=1.14.1"]
-build-backend = "maturin"
+# Custom node metadata for the Comfy Registry and ComfyUI-Manager.
+# The native wheel is built from rust_binding/pyproject.toml (maturin), not from this file.
 
 [project]
 name = "comfyui-ntsc-rs"
-version = "0.1.0"
-description = "Native NTSC/VHS/CRT effect processing for ComfyUI"
+version = "0.2.0"
+description = "Analog NTSC/VHS/CRT effects for ComfyUI images, powered by the ntsc-rs Rust engine."
 readme = "README.md"
-license = {text = "MIT OR ISC OR Apache-2.0"}
+license = { file = "LICENSE" }
 requires-python = ">=3.12"
-authors = [
-    {name = "ComfyUI NTSC-RS Contributors"}
-]
-keywords = ["comfyui", "ntsc", "vhs", "crt", "video-effects", "rust"]
+dependencies = ["numpy>=1.25"]  # Keep in sync with requirements.txt (ComfyUI-Manager).
+keywords = ["comfyui", "ntsc", "vhs", "crt", "analog", "retro", "rust"]
 classifiers = [
-    "Development Status :: 4 - Beta",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache Software License",
     "License :: OSI Approved :: MIT License",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Rust",
-    "Topic :: Multimedia :: Video",
+    "Topic :: Multimedia :: Graphics",
 ]
 
 [project.urls]
-Homepage = "https://github.com/gvastethecreator/comfyui-ntsc-rs"
+Homepage = "https://gvastethecreator.github.io/comfyui-ntsc-rs/"
 Repository = "https://github.com/gvastethecreator/comfyui-ntsc-rs"
-Documentation = "https://github.com/gvastethecreator/comfyui-ntsc-rs#readme"
+Documentation = "https://gvastethecreator.github.io/comfyui-ntsc-rs/"
+Issues = "https://github.com/gvastethecreator/comfyui-ntsc-rs/issues"
+"Bug Tracker" = "https://github.com/gvastethecreator/comfyui-ntsc-rs/issues"
 
-[project.optional-dependencies]
-dev = [
-    "maturin>=1.14.1",
-    "torch>=2.13.0",
-    "numpy>=2.5.2",
-    "ruff>=0.16.3",
-]
+[tool.comfy]
+PublisherId = "gvastethecreator"
+DisplayName = "NTSC-RS (VHS / CRT / analog video)"
+Icon = "https://raw.githubusercontent.com/gvastethecreator/comfyui-ntsc-rs/main/docs/assets/icon.png"
+requires-comfyui = ">=0.3.48"
+# Prebuilt native binaries, git-ignored, placed by the publish workflow.
+includes = ["native"]
 
 [tool.ruff]
 target-version = "py312"
@@ -45,7 +44,3 @@ line-length = 100
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP"]
 ignore = ["E501"]
-
-[tool.maturin]
-features = ["pyo3/extension-module"]
-manifest-path = "rust_binding/Cargo.toml"

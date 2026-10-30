@@ -4,14 +4,9 @@ This node provides complete 1:1 access to all ntsc-rs parameters.
 For quick preset-based effects, use NtscRsSimpleNode instead.
 """
 
-import numpy as np
-import torch
+from comfy_api.latest import io
 
-try:
-    from comfy_api.latest import io
-except ImportError:
-    from comfy import io
-
+from .native import apply_ntsc
 
 USE_FIELD_OPTIONS = [
     "Alternating",
@@ -571,58 +566,10 @@ class NtscRsNode(io.ComfyNode):
             outputs=[
                 io.Image.Output(display_name="Image", tooltip="Processed image"),
             ],
-            is_output_node=False,
-            is_experimental=False,
-            is_deprecated=False,
-            is_dev_only=False,
-            is_api_node=False,
-            is_input_list=False,
-            not_idempotent=False,
-            accept_all_inputs=False,
-            enable_expand=True,
-            search_aliases=["ntsc", "ntsc_rs", "vhs", "crt", "retro", "full"],
         )
 
     @classmethod
-    def build_params_dict(cls, **kwargs) -> dict:
-        """Build parameters dictionary from kwargs."""
-        return {k: v for k, v in kwargs.items() if v is not None}
-
-    @classmethod
-    def process(cls, image, **kwargs):
-        """Process the image through the NTSC effect."""
-        try:
-            import comfyui_ntsc_rs
-
-            HAS_RUST = True
-        except ImportError:
-            HAS_RUST = False
-
-        if not HAS_RUST:
-            raise ImportError(
-                "comfyui_ntsc_rs native module not found. "
-                "Run 'python build_node.py' to build the Rust binding."
-            )
-
-        params = cls.build_params_dict(**kwargs)
-
-        batch_size, height, width, channels = image.shape
-        results = []
-
-        for i in range(batch_size):
-            img = image[i]
-            img_np = (img.cpu().numpy() * 255.0).astype(np.uint8)
-
-            result = comfyui_ntsc_rs.apply_ntsc_filter(img_np, params)
-
-            result_float = torch.from_numpy(result).float() / 255.0
-            result_float = torch.clamp(result_float, 0.0, 1.0)
-
-            results.append(result_float)
-
-        output = torch.stack(results, dim=0)
-        return io.NodeOutput(output)
-
-    @classmethod
-    async def execute(cls, image, **kwargs):
-        return cls.process(image, **kwargs)
+    def execute(cls, image, phase_offset, **params):
+        # ntsc-rs reads the scanline phase offset under its own name.
+        params["video_scanline_phase_shift_offset"] = phase_offset
+        return io.NodeOutput(apply_ntsc(image, params))

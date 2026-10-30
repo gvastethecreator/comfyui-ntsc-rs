@@ -271,6 +271,7 @@ h1 {
 
 .signal-gallery,
 .node-section,
+.reference,
 .pipeline,
 .install {
   border-top: 1px solid var(--line);
@@ -317,6 +318,7 @@ h2 {
 
 .gallery-grid img {
   width: 100%;
+  height: auto;
   aspect-ratio: 3 / 2;
   object-fit: cover;
 }
@@ -341,6 +343,68 @@ h2 {
 
 .section-heading.compact {
   grid-template-columns: 0.5fr 2fr;
+}
+
+.examples-grid {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.examples-grid figcaption {
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+
+.examples-grid figcaption a {
+  flex-basis: 100%;
+  color: #f8f2e6;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.reference-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0 2rem;
+  align-items: start;
+}
+
+.reference details {
+  border-top: 1px solid var(--line);
+  padding: 1rem 0;
+}
+
+.reference summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: baseline;
+  cursor: pointer;
+}
+
+.reference summary span,
+.reference details > p,
+.reference li span {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.reference ul {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  columns: 2;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.reference li {
+  break-inside: avoid;
+}
+
+.reference code {
+  font-size: 0.78rem;
 }
 
 .node-grid {
@@ -494,7 +558,8 @@ footer a {
     gap: 2rem;
   }
 
-  .gallery-grid {
+  .gallery-grid,
+  .reference-list {
     grid-template-columns: 1fr;
   }
 

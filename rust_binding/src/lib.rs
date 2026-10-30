@@ -290,28 +290,33 @@ pub fn apply_ntsc_filter(
     let effect = build_ntsc_effect(params);
     let frame_num = get_i32(params, "frame_num", 0);
 
-    let scratch_len = YiqView::buf_length_for((width, height), effect.use_field.to_yiq_field(0));
-    let mut scratch = vec![0f32; scratch_len];
-    let mut yiq = YiqView::from_parts(
-        &mut scratch,
-        (width, height),
-        effect.use_field.to_yiq_field(0),
-    );
+    // The filter only touches owned buffers, so let other Python threads run meanwhile.
+    let output_buffer = py.detach(|| {
+        let scratch_len =
+            YiqView::buf_length_for((width, height), effect.use_field.to_yiq_field(0));
+        let mut scratch = vec![0f32; scratch_len];
+        let mut yiq = YiqView::from_parts(
+            &mut scratch,
+            (width, height),
+            effect.use_field.to_yiq_field(0),
+        );
 
-    let row_bytes = width * pixel_bytes_for::<Rgb, u8>();
-    let blit_info = BlitInfo::from_full_frame(width, height, row_bytes);
+        let row_bytes = width * pixel_bytes_for::<Rgb, u8>();
+        let blit_info = BlitInfo::from_full_frame(width, height, row_bytes);
 
-    yiq.set_from_strided_buffer::<Rgb, u8, _>(&rgb_buffer, blit_info, ());
+        yiq.set_from_strided_buffer::<Rgb, u8, _>(&rgb_buffer, blit_info, ());
 
-    effect.apply_effect_to_yiq(&mut yiq, frame_num as usize, [1.0, 1.0]);
+        effect.apply_effect_to_yiq(&mut yiq, frame_num as usize, [1.0, 1.0]);
 
-    let mut output_buffer = vec![0u8; width * height * 3];
-    yiq.write_to_strided_buffer::<Rgb, u8, _>(
-        &mut output_buffer,
-        blit_info,
-        DeinterlaceMode::Bob,
-        (),
-    );
+        let mut output_buffer = vec![0u8; width * height * 3];
+        yiq.write_to_strided_buffer::<Rgb, u8, _>(
+            &mut output_buffer,
+            blit_info,
+            DeinterlaceMode::Bob,
+            (),
+        );
+        output_buffer
+    });
 
     let array = unsafe { PyArray3::new(py, (height, width, 3), false) };
     let slice = unsafe { array.as_slice_mut()? };

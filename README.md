@@ -9,8 +9,7 @@
   <a href="https://github.com/gvastethecreator/comfyui-ntsc-rs/actions/workflows/ci.yml"><img alt="CI status" src="https://shieldcn.dev/github/ci/gvastethecreator/comfyui-ntsc-rs.svg?workflow=ci&branch=main&variant=secondary&size=xs" /></a>
   <a href="https://gvastethecreator.github.io/comfyui-ntsc-rs/"><img alt="Project site" src="https://shieldcn.dev/badge/site-pages-243f8f.svg?logo=githubpages&variant=branded&size=xs" /></a>
   <a href="https://www.python.org/"><img alt="Python 3.12 or newer" src="https://shieldcn.dev/badge/Python-3.12%2B-3776AB.svg?logo=python&variant=branded&size=xs" /></a>
-  <a href="https://rustup.rs/"><img alt="Rust 1.89 or newer" src="https://shieldcn.dev/badge/Rust-1.89%2B-000000.svg?logo=rust&variant=branded&size=xs" /></a>
-  <a href="LICENSE"><img alt="MIT, ISC, or Apache 2.0 license" src="https://shieldcn.dev/github/license/gvastethecreator/comfyui-ntsc-rs.svg?variant=secondary&size=xs" /></a>
+    <a href="LICENSE"><img alt="MIT license" src="https://shieldcn.dev/github/license/gvastethecreator/comfyui-ntsc-rs.svg?variant=secondary&size=xs" /></a>
 </p>
 
 Native VHS, CRT, and NTSC effects for ComfyUI. Ten nodes combine a Python UI layer with the vendored `ntsc-rs` signal processor compiled through Rust, PyO3, and Maturin.
@@ -34,35 +33,48 @@ The source fixture was created with OpenAI Imagegen. Every processed frame below
 
 See [gallery provenance](docs/assets/gallery/README.md) for the exact rendering boundary.
 
+## Example workflows
+
+[`example_workflows/`](example_workflows) holds four graphs. ComfyUI lists them under **Templates → comfyui-ntsc-rs**; you can also drop a JSON file onto the canvas. Each `.jpg` is the real output of its workflow (ComfyUI 0.43, seed 23).
+
+| Workflow | Graph |
+| --- | --- |
+| [Simple VHS](example_workflows/NTSC-RS_Simple_VHS.json) | Load Image → Simple (`vhs_classic`) → Save |
+| [Intermediate CRT](example_workflows/NTSC-RS_Intermediate_CRT.json) | Load Image → Intermediate (`crt_tv`) → Save |
+| [Chain worn tape](example_workflows/NTSC-RS_Chain_Worn_Tape.json) | Load Image → Signal → Artifacts → Noise → VHS → Save |
+| [Advanced security cam](example_workflows/NTSC-RS_Advanced_Security_Cam.json) | Load Image → Advanced (EP tape, snow, phase error) → Save |
+
 ## Requirements
 
-- ComfyUI with `comfy_api.latest`
-- Python 3.12 or newer (NumPy 2.5.2 dropped 3.10 and 3.11)
-- Rust 1.89 or newer (current SIMD crate; edition 2024)
-- Windows, Linux, or macOS toolchain able to build a native Python extension
-
-This repository has no JavaScript package graph, so Bun and pnpm do not apply.
+- ComfyUI 0.3.48 or newer (V3 node API, `comfy_entrypoint`).
+- Python 3.12 or newer. NumPy comes with ComfyUI; PyTorch comes with ComfyUI and is not pinned here.
+- A prebuilt binary exists for Windows x64, Linux x64/arm64 (glibc 2.17+) and macOS arm64/x64. Other platforms need Rust 1.89+ to build it.
 
 ## Install
 
-Clone the repository inside `ComfyUI/custom_nodes`, activate the same Python environment used by ComfyUI, then build and install the native wheel:
+**ComfyUI-Manager or Comfy Registry:** search for *NTSC-RS* and install, or run `comfy node install comfyui-ntsc-rs`. Restart ComfyUI.
 
-```powershell
+**Git clone:**
+
+```bash
+cd ComfyUI/custom_nodes
 git clone https://github.com/gvastethecreator/comfyui-ntsc-rs.git
-cd comfyui-ntsc-rs
-python -m pip install -r requirements.txt
-python build_node.py --install
 ```
 
-Restart ComfyUI. A successful load prints one concise `[NTSC-RS] Loaded 10 nodes` message.
+Restart ComfyUI. On first start, the node downloads the binary that matches this version and platform from the [GitHub release](https://github.com/gvastethecreator/comfyui-ntsc-rs/releases) into `native/`. After that it works offline. Nothing is installed into the Python environment. A successful start prints no NTSC-RS warning.
 
-`build_node.py` never installs tools, copies files, or changes a ComfyUI directory unless `--install` is explicitly passed. Use `--python PATH` when the target ComfyUI interpreter is not active:
+**Build from source** (no prebuilt binary, offline machine, or local changes). Install [Rust](https://rustup.rs/), then run with the Python that runs ComfyUI:
 
-```powershell
-python build_node.py --python C:\path\to\ComfyUI\venv\Scripts\python.exe --install
+```bash
+python -m pip install "maturin>=1.16,<2"
+python build_node.py
 ```
 
-ComfyUI loads nodes through `ComfyExtension`. `NODE_CLASS_MAPPINGS` remains for older loaders.
+`build_node.py` builds one abi3 wheel and copies its extension into `native/`, where the node loads it. Add `--install` to also pip-install the wheel into `--python PATH`.
+
+If the binary is missing, ComfyUI still starts: the console prints the reason and the exact build command, and running a node raises the same message.
+
+Agents: follow [AGENTS.md](AGENTS.md).
 
 ## Nodes
 
@@ -77,43 +89,31 @@ ComfyUI loads nodes through `ComfyExtension`. `NODE_CLASS_MAPPINGS` remains for 
 | NTSC-RS Noise | Add composite, luma, chroma, and ringing noise. |
 | NTSC-RS VHS | Control tape speed, chroma loss, sharpening, and edge wave. |
 | NTSC-RS Global | Add snow, phase variation, and chroma delay. |
-| NTSC-RS Scale | Apply horizontal and vertical signal scaling. |
+| NTSC-RS Scale | Resize the image (presets or custom horizontal/vertical factors). |
 
-Start with **Simple**. Use the chainable nodes when a workflow needs one isolated effect family. Use **Advanced** only when every parameter must be exposed.
+Start with **Simple**. Use the chainable nodes when a workflow needs one isolated effect family; put **Signal** first, because the other chainable nodes keep the signal stage neutral. Use **Advanced** only when every parameter must be exposed. The full input list is on the [project site](https://gvastethecreator.github.io/comfyui-ntsc-rs/#reference).
 
 ## Development
-
-Create and activate a local virtual environment before installing development tools:
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install -e ".[dev]"
-python scripts\verify.py
+python -m pip install numpy torch "maturin==1.16.0" "ruff==0.17.3"
+python scripts/verify.py          # ruff, cargo fmt/check/test/clippy
+python build_node.py --dev        # fast build into native/
+python scripts/native_smoke.py    # load native/ like the node does and check the NumPy boundary
 ```
 
-`Cargo.lock` is authoritative. Build and verify commands pass `--locked`.
+`Cargo.lock` is authoritative; builds pass `--locked`. `python scripts/verify.py --fix` formats Python and Rust. `python scripts/clean_generated.py` removes build output.
 
-Common commands:
-
-```powershell
-python scripts\verify.py --fix     # format Python and Rust
-python build_node.py --check       # validate the Rust binding
-python build_node.py --dev         # build a fast development wheel
-python build_node.py               # build an optimized wheel
-python scripts\clean_generated.py  # remove local build and cache output
-```
-
-After installing a development wheel, run `python scripts/native_smoke.py` to check contiguous RGB, strided RGB, one-channel expansion, and invalid zero-channel input.
-
-Current pins and migration notes: [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md).
+Release: bump `version` in `pyproject.toml` and `rust_binding/Cargo.toml`, push a `vX.Y.Z` tag, and publish the draft release that [release.yml](.github/workflows/release.yml) creates. Then run [publish.yml](.github/workflows/publish.yml) by hand to push the node, with binaries bundled, to the Comfy Registry (needs the `REGISTRY_ACCESS_TOKEN` secret).
 
 ## Troubleshooting
 
-- **`maturin>=1.14.1 is required`**: install `requirements.txt` in the selected Python environment.
+- **`[NTSC-RS] ... HTTP Error 404`**: no release exists yet for this version, or GitHub is unreachable. Build from source.
+- **`no prebuilt binary for <os>/<arch>`**: build from source.
 - **`Rust/Cargo not found`**: install Rust from [rustup.rs](https://rustup.rs/) and restart the terminal.
-- **Wheel tag does not match Python**: rebuild with the exact ComfyUI interpreter through `--python`.
-- **Node import fails**: confirm ComfyUI uses Python 3.12+ and that `comfyui_ntsc_rs` is installed in that same environment.
+- **`Needs ComfyUI 0.3.48 or newer`**: update ComfyUI.
 
 ## Support
 
@@ -121,4 +121,4 @@ If this project saves you time, you can [sponsor the work on GitHub](https://git
 
 ## License
 
-This integration and its vendored components retain their declared MIT, ISC, and Apache-2.0 terms. See [LICENSE](LICENSE) and the vendored crate manifests.
+MIT. The vendored [ntsc-rs](https://github.com/valadaptive/ntsc-rs) is offered under MIT OR ISC OR Apache-2.0 and is used here under MIT; see [LICENSE](LICENSE) and [rust_binding/vendor/LICENSE-MIT](rust_binding/vendor/LICENSE-MIT).
